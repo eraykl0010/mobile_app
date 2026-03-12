@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_md">
+
+        <com.google.android.material.card.MaterialCardView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/card_radius"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <!-- İzin Türü -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="İzin Türü"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_caption"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerLeaveType"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:background="@drawable/bg_edit_text"
+                    android:paddingStart="@dimen/spacing_sm"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_md" />
+
+                <!-- Başlangıç Tarihi -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Başlangıç Tarihi"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_caption"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etStartDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:background="@drawable/bg_edit_text"
+                    android:hint="Tarih seçin"
+                    android:textColorHint="@color/text_hint"
+                    android:paddingStart="@dimen/spacing_md"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_md" />
+
+                <!-- Bitiş Tarihi -->
+                <TextView
+                    android:id="@+id/labelEndDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bitiş Tarihi"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_caption"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etEndDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:background="@drawable/bg_edit_text"
+                    android:hint="Tarih seçin"
+                    android:textColorHint="@color/text_hint"
+                    android:paddingStart="@dimen/spacing_md"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_md" />
+
+                <!-- Saatlik İzin için Saat Alanları -->
+                <LinearLayout
+                    android:id="@+id/layoutTimeFields"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="@dimen/spacing_sm">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Başlangıç Saati"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_caption"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/etStartTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/button_height"
+                            android:background="@drawable/bg_edit_text"
+                            android:hint="Saat"
+                            android:clickable="true"
+                            android:focusable="false"
+                            android:paddingStart="@dimen/spacing_md"
+                            android:layout_marginTop="@dimen/spacing_xs" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Bitiş Saati"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_caption"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/etEndTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/button_height"
+                            android:background="@drawable/bg_edit_text"
+                            android:hint="Saat"
+                            android:clickable="true"
+                            android:focusable="false"
+                            android:paddingStart="@dimen/spacing_md"
+                            android:layout_marginTop="@dimen/spacing_xs" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Açıklama -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Açıklama"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_caption"
+                    android:textStyle="bold"
+                    android:layout_marginTop="@dimen/spacing_md" />
+
+                <EditText
+                    android:id="@+id/etLeaveReason"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:background="@drawable/bg_edit_text"
+                    android:hint="İzin sebebinizi yazın"
+                    android:textColorHint="@color/text_hint"
+                    android:padding="@dimen/spacing_md"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_md" />
+
+                <Button
+                    android:id="@+id/btnSubmitLeave"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:background="@drawable/bg_button_primary"
+                    android:text="TALEP GÖNDER"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:stateListAnimator="@null" />
+
+                <ProgressBar
+                    android:id="@+id/progressLeave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:indeterminateTint="@color/primary"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>

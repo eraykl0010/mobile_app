@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- İzinler -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="OnlinePDKS"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PDKSMobile"
+        tools:targetApi="35"
+        android:usesCleartextTraffic="true">
+
+        <!-- Ana Ekran -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Giriş Ekranı -->
+        <activity
+            android:name=".login.LoginActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.PDKSMobile.Splash" />
+
+        <!-- Patron Dashboard -->
+        <activity
+            android:name=".patron.PatronDashboardActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Patron — Onay Listesi -->
+        <activity
+            android:name=".patron.ApprovalListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Patron — Geç Gelen / Erken Çıkan -->
+        <activity
+            android:name=".patron.LateEarlyListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Personel Dashboard -->
+        <activity
+            android:name=".personel.PersonelDashboardActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <!-- Personel — Konum Giriş/Çıkış -->
+        <activity
+            android:name=".personel.LocationCheckInActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Personel — QR Giriş/Çıkış -->
+        <activity
+            android:name=".personel.QrCheckInActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Personel — Giriş-Çıkış Raporu -->
+        <activity
+            android:name=".personel.AttendanceReportActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Personel — İzin Talebi -->
+        <activity
+            android:name=".personel.LeaveRequestActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Personel — Avans Talebi -->
+        <activity
+            android:name=".personel.AdvanceRequestActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Personel — Aylık Mesai -->
+        <activity
+            android:name=".personel.MonthlyOvertimeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".patron.PersonnelDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+    </application>
+</manifest>

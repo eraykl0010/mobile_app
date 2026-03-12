@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <include layout="@layout/layout_toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="@dimen/spacing_lg">
+
+        <!-- Durum İkonu -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@drawable/bg_gradient_orange"
+            android:padding="30dp"
+            android:layout_marginBottom="@dimen/spacing_lg">
+
+            <ImageView
+                android:id="@+id/ivCheckIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@android:drawable/ic_menu_mylocation"
+                android:contentDescription="Konum"
+                android:tint="@color/white" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvCheckStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Konum alınıyor..."
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvLocationInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Koordinatlar bekleniyor"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_caption"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/spacing_sm" />
+
+        <TextView
+            android:id="@+id/tvCurrentTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--:--"
+            android:textColor="@color/primary"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/spacing_lg" />
+
+        <Button
+            android:id="@+id/btnCheckInOut"
+            android:layout_width="220dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:background="@drawable/bg_button_primary"
+            android:text="GİRİŞ / ÇIKIŞ YAP"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_subtitle"
+            android:textStyle="bold"
+            android:stateListAnimator="@null"
+            android:enabled="false" />
+
+        <ProgressBar
+            android:id="@+id/progressCheckIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:indeterminateTint="@color/primary"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/text_body"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ana Turuncu Tonları -->
+    <color name="primary">#FF6D00</color>
+    <color name="primary_dark">#E65100</color>
+    <color name="primary_light">#FFA040</color>
+    <color name="primary_very_light">#FFF3E0</color>
+
+    <!-- Accent -->
+    <color name="accent">#FF9100</color>
+
+    <!-- Beyaz / Nötr -->
+    <color name="white">#FFFFFF</color>
+    <color name="background">#FFF8F0</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="surface">#FFFAF5</color>
+
+    <!-- Metin -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_hint">#BDBDBD</color>
+
+    <!-- Durum Renkleri -->
+    <color name="status_success">#4CAF50</color>
+    <color name="status_warning">#FFC107</color>
+    <color name="status_danger">#F44336</color>
+    <color name="status_info">#2196F3</color>
+
+    <!-- Divider -->
+    <color name="divider">#FFE0B2</color>
+
+    <!-- Gradient için -->
+    <color name="gradient_start">#FF6D00</color>
+    <color name="gradient_end">#FFA040</color>
+</resources>
