@@ -51,6 +51,35 @@
             android:padding="@dimen/spacing_sm"
             android:columnCount="3"
             android:rowCount="2">
+            <!-- Mevcut -->
+            <LinearLayout
+                android:id="@+id/boxTotal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_card_rounded"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_sm"
+                android:clickable="true"
+                android:focusable="true">
+                <TextView
+                    android:id="@+id/tvDetTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/status_info"
+                    android:textSize="@dimen/text_large_number"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mevcut Personel"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    android:gravity="center" />
+            </LinearLayout>
 
             <!-- Aktif -->
             <LinearLayout
@@ -77,36 +106,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Aktif Çalışan"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
-                    android:gravity="center" />
-            </LinearLayout>
-
-            <!-- Mevcut -->
-            <LinearLayout
-                android:id="@+id/boxTotal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:background="@drawable/bg_card_rounded"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_sm"
-                android:clickable="true"
-                android:focusable="true">
-                <TextView
-                    android:id="@+id/tvDetTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="@color/status_info"
-                    android:textSize="@dimen/text_large_number"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Mevcut Personel"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp"
                     android:gravity="center" />
