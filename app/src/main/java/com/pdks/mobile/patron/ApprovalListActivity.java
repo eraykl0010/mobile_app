@@ -18,6 +18,7 @@ import com.pdks.mobile.model.AdvanceRequest;
 import com.pdks.mobile.model.ApiResponse;
 import com.pdks.mobile.model.ApprovalRequest;
 import com.pdks.mobile.model.LeaveRequest;
+import com.pdks.mobile.util.DateSortHelper;
 import com.pdks.mobile.util.ViewUtils;
 
 import java.util.List;
@@ -114,6 +115,7 @@ public class ApprovalListActivity extends AppCompatActivity {
                                 setEmptyMessage();
                             } else {
                                 tvEmpty.setVisibility(View.GONE);
+                                DateSortHelper.sortByDate(list, LeaveRequest::getRequestDate);
                                 setupLeaveAdapter(list);
                             }
                         }
@@ -165,6 +167,7 @@ public class ApprovalListActivity extends AppCompatActivity {
                                 setEmptyMessage();
                             } else {
                                 tvEmpty.setVisibility(View.GONE);
+                                DateSortHelper.sortByDate(list, AdvanceRequest::getRequestDate);
                                 setupAdvanceAdapter(list);
                             }
                         }

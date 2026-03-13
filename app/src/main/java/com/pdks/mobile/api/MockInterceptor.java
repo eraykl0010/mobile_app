@@ -12,6 +12,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 
 public class MockInterceptor implements Interceptor {
 
@@ -29,6 +30,9 @@ public class MockInterceptor implements Interceptor {
         String query = request.url().query();
         String method = request.method();
 
+        // POST body'yi oku — login patron/personel ayrımı için gerekli
+        String body = readRequestBody(request);
+
         Log.d(TAG, method + " " + path + (query != null ? "?" + query : ""));
 
         // 300ms yapay gecikme — gerçek ağ hissi
@@ -36,7 +40,7 @@ public class MockInterceptor implements Interceptor {
             Thread.sleep(300);
         } catch (InterruptedException ignored) {}
 
-        String responseBody = routeRequest(path, query, method);
+        String responseBody = routeRequest(path, query, method, body);
 
         return new Response.Builder()
                 .code(200)
@@ -48,26 +52,55 @@ public class MockInterceptor implements Interceptor {
                 .build();
     }
 
-    private String routeRequest(String path, String query, String method) {
+    /**
+     * POST body'yi string olarak oku.
+     * Mock modda body'yi analiz etmek için gerekli (ör: login module_type ayrımı).
+     */
+    private String readRequestBody(Request request) {
+        try {
+            if (request.body() == null) return "";
+            Buffer buffer = new Buffer();
+            request.body().writeTo(buffer);
+            return buffer.readUtf8();
+        } catch (Exception e) {
+            Log.w(TAG, "Request body okunamadı: " + e.getMessage());
+            return "";
+        }
+    }
+
+    /**
+     * Endpoint yönlendirme — path.endsWith() ile güvenli eşleşme.
+     *
+     * path.contains() yerine path.endsWith() kullanılmasının sebebi:
+     * contains("login") → "patron/login-report" gibi gelecekteki bir endpoint'i de yakalar
+     * endsWith("login") → sadece tam olarak "login" ile biten path'i yakalar
+     */
+    private String routeRequest(String path, String query, String method, String body) {
 
         // ──────── AUTH ────────
-        if (path.contains(ApiConfig.LOGIN)) {
-            // Basit kural: card_no "0000" ile biterse hata, yoksa başarılı
-            // POST body'yi okuyamadığımız için query veya path'e bakmıyoruz
-            // Patron/Personel ayrımı header'dan veya body'den gelecekti
-            // Mock'ta basitçe: path'e göre patron login dönelim
-            // LoginActivity moduleType'ı body'de gönderiyor
-            // Mock'ta ikisini de başarılı döndürüyoruz — session manager modülü ayırt edecek
-            return MockDataProvider.loginPersonelSuccess();
+        if (path.endsWith(ApiConfig.LOGIN)) {
+            // Body'den module_type belirle → patron mu personel mi?
+            if (body.contains("\"patron\"")) {
+                return MockDataProvider.loginPatronSuccess();
+            } else if (body.contains("\"0000\"")) {
+                // card_no "0000" → hatalı giriş testi
+                return MockDataProvider.loginFailed();
+            } else {
+                return MockDataProvider.loginPersonelSuccess();
+            }
+        }
+
+        if (path.endsWith(ApiConfig.RESET_DEVICE)) {
+            return MockDataProvider.approveSuccess();
         }
 
         // ──────── DEPARTMENTS ────────
-        if (path.contains(ApiConfig.DEPARTMENT_LIST)) {
+        if (path.endsWith(ApiConfig.DEPARTMENT_LIST)) {
             return MockDataProvider.departments();
         }
 
         // ──────── DASHBOARD SUMMARY ────────
-        if (path.contains(ApiConfig.DASHBOARD_SUMMARY)) {
+        if (path.endsWith(ApiConfig.DASHBOARD_SUMMARY)) {
             if (query != null && query.contains("department_id=")) {
                 String deptId = extractParam(query, "department_id");
                 switch (deptId) {
@@ -83,8 +116,16 @@ public class MockInterceptor implements Interceptor {
             return MockDataProvider.dashboardSummaryAll();
         }
 
-// ──────── LEAVE REQUESTS (with status filter) ────────
-        if (path.contains(ApiConfig.PENDING_LEAVE_REQUESTS)) {
+        // ──────── PERSONNEL LIST ────────
+        // Not: Bu blok PENDING_LEAVE_REQUESTS'ten önce olmalı
+        // çünkü endsWith ile çakışma riski yok ama okunabilirlik için
+        // patron endpoint'leri bir arada tutuyoruz
+        if (path.endsWith(ApiConfig.PERSONNEL_LIST)) {
+            return MockDataProvider.personnelList();
+        }
+
+        // ──────── LEAVE REQUESTS (with status filter) ────────
+        if (path.endsWith(ApiConfig.PENDING_LEAVE_REQUESTS)) {
             String status = extractParam(query != null ? query : "", "status");
             String type = extractParam(query != null ? query : "", "type");
 
@@ -103,8 +144,8 @@ public class MockInterceptor implements Interceptor {
             }
         }
 
-// ──────── ADVANCE REQUESTS (with status filter) ────────
-        if (path.contains(ApiConfig.PENDING_ADVANCE_REQUESTS)) {
+        // ──────── ADVANCE REQUESTS (with status filter) ────────
+        if (path.endsWith(ApiConfig.PENDING_ADVANCE_REQUESTS)) {
             String status = extractParam(query != null ? query : "", "status");
             if ("approved".equals(status)) {
                 return MockDataProvider.approvedAdvances();
@@ -116,27 +157,27 @@ public class MockInterceptor implements Interceptor {
         }
 
         // ──────── APPROVE / REJECT ────────
-        if (path.contains(ApiConfig.APPROVE_REQUEST) || path.contains(ApiConfig.REJECT_REQUEST)) {
+        if (path.endsWith(ApiConfig.APPROVE_REQUEST) || path.endsWith(ApiConfig.REJECT_REQUEST)) {
             return MockDataProvider.approveSuccess();
         }
 
         // ──────── LATE-EARLY REPORT ────────
-        if (path.contains(ApiConfig.LATE_EARLY_REPORT)) {
+        if (path.endsWith(ApiConfig.LATE_EARLY_REPORT)) {
             return MockDataProvider.lateEarlyReport();
         }
 
         // ──────── DAILY REPORT ────────
-        if (path.contains(ApiConfig.DAILY_REPORT)) {
+        if (path.endsWith(ApiConfig.DAILY_REPORT)) {
             return MockDataProvider.dailyReport();
         }
 
         // ──────── WEEKLY REPORT ────────
-        if (path.contains(ApiConfig.WEEKLY_REPORT)) {
+        if (path.endsWith(ApiConfig.WEEKLY_REPORT)) {
             return MockDataProvider.weeklyReport();
         }
 
         // ──────── MONTHLY OVERTIME ────────
-        if (path.contains(ApiConfig.MONTHLY_OVERTIME)) {
+        if (path.endsWith(ApiConfig.MONTHLY_OVERTIME)) {
             String month = "2026-02";
             if (query != null && query.contains("month=")) {
                 month = extractParam(query, "month");
@@ -145,37 +186,33 @@ public class MockInterceptor implements Interceptor {
         }
 
         // ──────── LEAVE REQUEST (POST) ────────
-        if (path.contains(ApiConfig.LEAVE_REQUEST) && "POST".equals(method)) {
+        if (path.endsWith(ApiConfig.LEAVE_REQUEST) && "POST".equals(method)) {
             return MockDataProvider.submitSuccess();
         }
 
         // ──────── LEAVE HISTORY ────────
-        if (path.contains(ApiConfig.LEAVE_HISTORY)) {
+        if (path.endsWith(ApiConfig.LEAVE_HISTORY)) {
             return MockDataProvider.leaveHistory();
         }
 
         // ──────── ADVANCE REQUEST (POST) ────────
-        if (path.contains(ApiConfig.ADVANCE_REQUEST) && "POST".equals(method)) {
+        if (path.endsWith(ApiConfig.ADVANCE_REQUEST) && "POST".equals(method)) {
             return MockDataProvider.submitSuccess();
         }
 
         // ──────── ADVANCE HISTORY ────────
-        if (path.contains(ApiConfig.ADVANCE_HISTORY)) {
+        if (path.endsWith(ApiConfig.ADVANCE_HISTORY)) {
             return MockDataProvider.advanceHistory();
         }
 
         // ──────── CHECK IN/OUT ────────
-        if (path.contains(ApiConfig.CHECK_IN_OUT) || path.contains(ApiConfig.QR_CHECK_IN_OUT)) {
+        if (path.endsWith(ApiConfig.CHECK_IN_OUT) || path.endsWith(ApiConfig.QR_CHECK_IN_OUT)) {
             nextIsCheckOut = !nextIsCheckOut;
             if (nextIsCheckOut) {
                 return MockDataProvider.checkOutSuccess();
             } else {
                 return MockDataProvider.checkInSuccess();
             }
-        }
-        // ──────── PERSONNEL LIST ────────
-        if (path.contains(ApiConfig.PERSONNEL_LIST)) {
-            return MockDataProvider.personnelList();
         }
 
         // ──────── DEFAULT ────────

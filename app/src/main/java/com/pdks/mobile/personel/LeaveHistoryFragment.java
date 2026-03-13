@@ -18,6 +18,7 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.LeaveRequest;
+import com.pdks.mobile.util.DateSortHelper;
 import com.pdks.mobile.util.SessionManager;
 
 import java.util.List;
@@ -65,7 +66,9 @@ public class LeaveHistoryFragment extends Fragment {
                         tvEmpty.setVisibility(View.VISIBLE);
                     } else {
                         tvEmpty.setVisibility(View.GONE);
-                        adapter.setItems(resp.body());
+                        List<LeaveRequest> list = resp.body();
+                        DateSortHelper.sortByDate(list, LeaveRequest::getRequestDate);
+                        adapter.setItems(list);
                     }
                 }
             }

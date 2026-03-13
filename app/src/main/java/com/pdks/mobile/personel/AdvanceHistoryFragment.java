@@ -20,6 +20,7 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.AdvanceRequest;
+import com.pdks.mobile.util.DateSortHelper;
 import com.pdks.mobile.util.SessionManager;
 
 import java.text.NumberFormat;
@@ -68,7 +69,9 @@ public class AdvanceHistoryFragment extends Fragment {
                         tvEmpty.setVisibility(View.VISIBLE);
                     } else {
                         tvEmpty.setVisibility(View.GONE);
-                        setupAdapter(resp.body());
+                        List<AdvanceRequest> list = resp.body();
+                        DateSortHelper.sortByDate(list, AdvanceRequest::getRequestDate);
+                        setupAdapter(list);
                     }
                 }
             }
