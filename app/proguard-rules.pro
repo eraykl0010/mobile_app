@@ -1,21 +1,84 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ══════════════════════════════════════════════════════════════
+# OnlinePDKS — ProGuard / R8 Kuralları
+# ══════════════════════════════════════════════════════════════
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Stack trace okunabilirliği için satır numaralarını koru
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ══════════════ GSON + MODEL SINIFLARI ══════════════
+# Gson, @SerializedName anotasyonlu alanları reflection ile okur.
+# Bu alanlar obfuscate edilirse JSON dönüşümü bozulur.
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# Tüm model sınıflarını koru — Gson serialization/deserialization için
+-keep class com.pdks.mobile.model.** { *; }
+
+# Gson iç yapısı
+-keep class com.google.gson.** { *; }
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# ══════════════ RETROFIT ══════════════
+# Retrofit interface metodları reflection ile çağrılır
+
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+
+# Retrofit annotation'larını koru
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+
+# ApiService interface'ini koru
+-keep interface com.pdks.mobile.api.ApiService { *; }
+
+# ApiConfig sabitlerini koru
+-keep class com.pdks.mobile.api.ApiConfig { *; }
+
+# ══════════════ OKHTTP ══════════════
+
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+
+# ══════════════ ML KIT (Barcode) ══════════════
+
+-keep class com.google.mlkit.** { *; }
+-dontwarn com.google.mlkit.**
+
+# ══════════════ CAMERAX ══════════════
+
+-keep class androidx.camera.** { *; }
+
+# ══════════════ ZXING (QR Üretimi) ══════════════
+
+-keep class com.google.zxing.** { *; }
+
+# ══════════════ PLAY SERVICES (Location) ══════════════
+
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# ══════════════ ENCRYPTED SHARED PREFERENCES ══════════════
+
+-keep class androidx.security.crypto.** { *; }
+
+# ══════════════ GENEL ══════════════
+
+# Enum'ları koru
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# Parcelable
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+# ViewBinding sınıfları
+-keep class com.pdks.mobile.databinding.** { *; }

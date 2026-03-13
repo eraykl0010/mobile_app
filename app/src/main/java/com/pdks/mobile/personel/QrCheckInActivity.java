@@ -325,48 +325,32 @@ public class QrCheckInActivity extends AppCompatActivity {
     }
 
     private Bitmap generateQrBitmap(String content, int size) throws Exception {
-        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(size, size,
-                android.graphics.Bitmap.Config.ARGB_8888);
+        // ZXing ile gerçek, taranabilir QR kod üret
+        com.google.zxing.qrcode.QRCodeWriter writer = new com.google.zxing.qrcode.QRCodeWriter();
 
-        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
-        canvas.drawColor(android.graphics.Color.WHITE);
-        android.graphics.Paint paint = new android.graphics.Paint();
-        paint.setColor(android.graphics.Color.BLACK);
+        java.util.Map<com.google.zxing.EncodeHintType, Object> hints = new java.util.HashMap<>();
+        hints.put(com.google.zxing.EncodeHintType.CHARACTER_SET, "UTF-8");
+        hints.put(com.google.zxing.EncodeHintType.MARGIN, 1);
+        hints.put(com.google.zxing.EncodeHintType.ERROR_CORRECTION,
+                com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.M);
 
-        int moduleSize = size / 33;
-        int hash = content.hashCode();
-        java.util.Random random = new java.util.Random(hash);
+        com.google.zxing.common.BitMatrix bitMatrix =
+                writer.encode(content, com.google.zxing.BarcodeFormat.QR_CODE, size, size, hints);
 
-        for (int row = 0; row < 33; row++) {
-            for (int col = 0; col < 33; col++) {
-                boolean isFinderPattern =
-                        (row < 7 && col < 7) ||
-                                (row < 7 && col >= 26) ||
-                                (row >= 26 && col < 7);
+        int width = bitMatrix.getWidth();
+        int height = bitMatrix.getHeight();
+        int[] pixels = new int[width * height];
 
-                if (isFinderPattern) {
-                    boolean border = row == 0 || row == 6 || col == 0 || col == 6
-                            || (row >= 2 && row <= 4 && col >= 2 && col <= 4)
-                            || (row < 7 && col >= 26 && (col == 26 || col == 32
-                            || row == 0 || row == 6
-                            || (row >= 2 && row <= 4 && col >= 28 && col <= 30)))
-                            || (row >= 26 && col < 7 && (row == 26 || row == 32
-                            || col == 0 || col == 6
-                            || (col >= 2 && col <= 4 && row >= 28 && row <= 30)));
-
-                    if (border) {
-                        canvas.drawRect(
-                                col * moduleSize, row * moduleSize,
-                                (col + 1) * moduleSize, (row + 1) * moduleSize, paint);
-                    }
-                } else if (random.nextBoolean()) {
-                    canvas.drawRect(
-                            col * moduleSize, row * moduleSize,
-                            (col + 1) * moduleSize, (row + 1) * moduleSize, paint);
-                }
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                pixels[y * width + x] = bitMatrix.get(x, y)
+                        ? android.graphics.Color.BLACK
+                        : android.graphics.Color.WHITE;
             }
         }
 
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
         return bitmap;
     }
 

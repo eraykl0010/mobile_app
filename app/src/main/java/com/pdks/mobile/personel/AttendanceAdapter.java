@@ -37,10 +37,16 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.Vi
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AttendanceRecord item = items.get(position);
 
-        // Tarihten gün numarasını çıkar (basit: son 2 karakter)
+        // Tarihten gün numarasını çıkar — format: "dd.MM.yyyy"
         String date = item.getDate();
-        if (date != null && date.length() >= 2) {
-            holder.tvDate.setText(date.substring(date.length() - 2));
+        if (date != null && date.contains(".")) {
+            // "21.02.2026" → split(".") → ["21", "02", "2026"] → ilk eleman gün
+            String day = date.split("\\.")[0];
+            holder.tvDate.setText(day);
+        } else if (date != null && date.length() >= 2) {
+            holder.tvDate.setText(date.substring(0, 2));
+        } else {
+            holder.tvDate.setText("-");
         }
         holder.tvDay.setText(item.getDayName());
 
@@ -53,10 +59,11 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.Vi
         }
         holder.tvWorkHours.setText(workInfo);
 
-        // Durum badge
+        // Durum badge — null-safe kontrol
         holder.tvStatus.setText(item.getStatusDisplay());
+        String status = item.getStatus() != null ? item.getStatus() : "";
         int statusColor;
-        switch (item.getStatus()) {
+        switch (status) {
             case "late": statusColor = Color.parseColor("#FFC107"); break;
             case "early": statusColor = Color.parseColor("#FF7043"); break;
             case "absent": statusColor = Color.parseColor("#F44336"); break;

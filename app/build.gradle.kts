@@ -18,7 +18,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -38,7 +39,7 @@ android {
 
 dependencies {
     // AndroidX Core
-    implementation("androidx.core:core")
+    implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.activity:activity:1.10.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
@@ -59,6 +60,9 @@ dependencies {
 
     // ML Kit Barcode — QR okuma
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
+
+    // ZXing — QR kod üretimi
+    implementation("com.google.zxing:core:3.5.3")
 
     // Location — Konum ile giriş/çıkış
     implementation("com.google.android.gms:play-services-location:21.3.0")

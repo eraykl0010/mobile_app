@@ -30,7 +30,8 @@ public class RetrofitClient {
             synchronized (RetrofitClient.class) {
                 if (retrofit == null) {
 
-                    SessionManager session = new SessionManager(context);
+                    // Application context kullan — Activity leak önlenir
+                    SessionManager session = new SessionManager(context.getApplicationContext());
 
                     // Loglama
                     HttpLoggingInterceptor logging = new HttpLoggingInterceptor();

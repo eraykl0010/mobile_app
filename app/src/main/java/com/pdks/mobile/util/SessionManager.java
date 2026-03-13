@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
+
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
 
 import java.net.NetworkInterface;
 import java.util.Collections;
@@ -11,7 +15,11 @@ import java.util.List;
 
 public class SessionManager {
 
-    private static final String PREF_NAME = "pdks_session";
+    private static final String TAG = "SessionManager";
+
+    private static final String PREF_NAME = "pdks_session_encrypted";
+    private static final String OLD_PREF_NAME = "pdks_session"; // Eski düz metin pref adı
+
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_MODULE_TYPE = "module_type";
     private static final String KEY_COMPANY_CODE = "company_code";
@@ -27,13 +35,56 @@ public class SessionManager {
     public static final String MODULE_PERSONEL = "personel";
 
     private final SharedPreferences prefs;
-    private final SharedPreferences.Editor editor;
     private final Context context;
 
     public SessionManager(Context context) {
-        this.context = context;
-        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        editor = prefs.edit();
+        this.context = context.getApplicationContext();
+        this.prefs = createEncryptedPrefs();
+
+        // Eski düz metin prefs dosyası varsa temizle (güvenlik için)
+        migrateFromOldPrefs();
+    }
+
+    /**
+     * EncryptedSharedPreferences oluştur.
+     * Bazı cihazlarda KeyStore sorunları olabileceğinden,
+     * hata durumunda düz metin prefs'e fallback yapar.
+     */
+    private SharedPreferences createEncryptedPrefs() {
+        try {
+            MasterKey masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            return EncryptedSharedPreferences.create(
+                    context,
+                    PREF_NAME,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "EncryptedSharedPreferences oluşturulamadı, düz metin fallback", e);
+            // Fallback — şifreleme başarısız olursa uygulama çökmemeli
+            return context.getSharedPreferences(PREF_NAME + "_fallback", Context.MODE_PRIVATE);
+        }
+    }
+
+    /**
+     * Eski düz metin "pdks_session" dosyası varsa sil.
+     * Kullanıcı bir sonraki girişte yeni şifreli depoya kaydedilecek.
+     */
+    private void migrateFromOldPrefs() {
+        try {
+            SharedPreferences oldPrefs = context.getSharedPreferences(OLD_PREF_NAME, Context.MODE_PRIVATE);
+            if (oldPrefs.contains(KEY_IS_LOGGED_IN)) {
+                // Eski düz metin veriyi temizle — hassas bilgiler şifresiz kalmasın
+                oldPrefs.edit().clear().apply();
+                Log.d(TAG, "Eski düz metin oturum verileri temizlendi");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Eski prefs temizleme hatası", e);
+        }
     }
 
     // ══════════════ MAC ADRESİ ══════════════
@@ -46,14 +97,12 @@ public class SessionManager {
 
         String mac = getMacFromNetworkInterface();
         if (mac != null && !mac.isEmpty() && !"02:00:00:00:00:00".equals(mac)) {
-            editor.putString(KEY_MAC_ADDRESS, mac);
-            editor.apply();
+            prefs.edit().putString(KEY_MAC_ADDRESS, mac).apply();
             return mac;
         }
 
         String fallback = "AID_" + getDeviceId();
-        editor.putString(KEY_MAC_ADDRESS, fallback);
-        editor.apply();
+        prefs.edit().putString(KEY_MAC_ADDRESS, fallback).apply();
         return fallback;
     }
 
@@ -76,7 +125,7 @@ public class SessionManager {
                 return sb.toString();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "MAC adresi alınamadı", e);
         }
         return null;
     }
@@ -88,16 +137,17 @@ public class SessionManager {
      */
     public void createPatronSession(String companyCode, String cardNo,
                                     String token, int personnelId, String name) {
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_MODULE_TYPE, MODULE_PATRON);
-        editor.putString(KEY_COMPANY_CODE, companyCode);
-        editor.putString(KEY_CARD_NO, cardNo);
-        editor.putString(KEY_TOKEN, token);
-        editor.putInt(KEY_PERSONNEL_ID, personnelId);
-        editor.putString(KEY_PERSONNEL_NAME, name);
-        editor.putBoolean(KEY_IS_PATRON, true);
-        editor.putString(KEY_MAC_ADDRESS, getMacAddress());
-        editor.apply();
+        prefs.edit()
+                .putBoolean(KEY_IS_LOGGED_IN, true)
+                .putString(KEY_MODULE_TYPE, MODULE_PATRON)
+                .putString(KEY_COMPANY_CODE, companyCode)
+                .putString(KEY_CARD_NO, cardNo)
+                .putString(KEY_TOKEN, token)
+                .putInt(KEY_PERSONNEL_ID, personnelId)
+                .putString(KEY_PERSONNEL_NAME, name)
+                .putBoolean(KEY_IS_PATRON, true)
+                .putString(KEY_MAC_ADDRESS, getMacAddress())
+                .apply();
     }
 
     public boolean isPatronLoggedIn() {
@@ -106,8 +156,7 @@ public class SessionManager {
 
     public void logoutPatron() {
         if (isPatron()) {
-            editor.clear();
-            editor.apply();
+            prefs.edit().clear().apply();
         }
     }
 
@@ -115,17 +164,18 @@ public class SessionManager {
 
     public void createPersonelSession(String companyCode, String cardNo,
                                       String token, int personnelId, String name) {
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_MODULE_TYPE, MODULE_PERSONEL);
-        editor.putString(KEY_COMPANY_CODE, companyCode);
-        editor.putString(KEY_CARD_NO, cardNo);
-        editor.putString(KEY_TOKEN, token);
-        editor.putInt(KEY_PERSONNEL_ID, personnelId);
-        editor.putString(KEY_PERSONNEL_NAME, name);
-        editor.putString(KEY_DEVICE_ID, getDeviceId());
-        editor.putString(KEY_MAC_ADDRESS, getMacAddress());
-        editor.putBoolean(KEY_IS_PATRON, false);
-        editor.apply();
+        prefs.edit()
+                .putBoolean(KEY_IS_LOGGED_IN, true)
+                .putString(KEY_MODULE_TYPE, MODULE_PERSONEL)
+                .putString(KEY_COMPANY_CODE, companyCode)
+                .putString(KEY_CARD_NO, cardNo)
+                .putString(KEY_TOKEN, token)
+                .putInt(KEY_PERSONNEL_ID, personnelId)
+                .putString(KEY_PERSONNEL_NAME, name)
+                .putString(KEY_DEVICE_ID, getDeviceId())
+                .putString(KEY_MAC_ADDRESS, getMacAddress())
+                .putBoolean(KEY_IS_PATRON, false)
+                .apply();
     }
 
     public boolean isPersonelLocked() {

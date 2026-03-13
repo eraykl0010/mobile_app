@@ -3,6 +3,7 @@ package com.pdks.mobile.personel;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.pdks.mobile.databinding.ActivityPersonelDashboardBinding;
@@ -24,6 +25,7 @@ public class PersonelDashboardActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
         setupUI();
         setupClickListeners();
+        setupBackPress();
         ViewUtils.applyStatusBarPadding(this);
     }
 
@@ -52,9 +54,16 @@ public class PersonelDashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MonthlyOvertimeActivity.class)));
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        moveTaskToBack(true);
+    /**
+     * Personel modülünde geri tuşu uygulamayı kapatmamalı,
+     * sadece arka plana atmalı. Cihaz kilitli modda çalışıyor.
+     */
+    private void setupBackPress() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                moveTaskToBack(true);
+            }
+        });
     }
 }

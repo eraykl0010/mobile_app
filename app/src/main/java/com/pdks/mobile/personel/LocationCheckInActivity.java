@@ -130,6 +130,8 @@ public class LocationCheckInActivity extends AppCompatActivity {
             return;
         }
 
+        // Çift tıklama koruması — buton hemen devre dışı
+        btnCheckInOut.setEnabled(false);
         progressBar.setVisibility(View.VISIBLE);
 
         CheckInOutRequest request = new CheckInOutRequest(
@@ -143,7 +145,6 @@ public class LocationCheckInActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<CheckInOutResponse> call, Response<CheckInOutResponse> resp) {
                 progressBar.setVisibility(View.GONE);
-                btnCheckInOut.setEnabled(true);
 
                 if (resp.isSuccessful() && resp.body() != null) {
                     CheckInOutResponse result = resp.body();
@@ -151,11 +152,16 @@ public class LocationCheckInActivity extends AppCompatActivity {
                         tvResult.setVisibility(View.VISIBLE);
                         tvResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
                         tvResult.setTextColor(getColor(R.color.status_success));
+                        // Başarılı işlem sonrası buton 3 sn kilitli kalsın — mükerrer kayıt önlenir
+                        btnCheckInOut.postDelayed(() -> btnCheckInOut.setEnabled(true), 3000);
                     } else {
                         tvResult.setVisibility(View.VISIBLE);
                         tvResult.setText(result.getMessage());
                         tvResult.setTextColor(getColor(R.color.status_danger));
+                        btnCheckInOut.setEnabled(true);
                     }
+                } else {
+                    btnCheckInOut.setEnabled(true);
                 }
             }
 
