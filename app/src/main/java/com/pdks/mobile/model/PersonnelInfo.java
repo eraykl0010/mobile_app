@@ -73,4 +73,22 @@ public class PersonnelInfo {
             default:         return status;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PersonnelInfo that = (PersonnelInfo) o;
+        return id == that.id
+                && java.util.Objects.equals(name, that.name)
+                && java.util.Objects.equals(department, that.department)
+                && java.util.Objects.equals(checkIn, that.checkIn)
+                && java.util.Objects.equals(checkOut, that.checkOut)
+                && java.util.Objects.equals(status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(id, name, department, checkIn, checkOut, status);
+    }
 }

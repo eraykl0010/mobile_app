@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
@@ -18,15 +20,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class AdvanceHistoryAdapter extends RecyclerView.Adapter<AdvanceHistoryAdapter.ViewHolder> {
+public class AdvanceHistoryAdapter extends ListAdapter<AdvanceRequest, AdvanceHistoryAdapter.ViewHolder> {
 
-    private List<AdvanceRequest> items = new ArrayList<>();
+    private static final DiffUtil.ItemCallback<AdvanceRequest> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<AdvanceRequest>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull AdvanceRequest oldItem,
+                                               @NonNull AdvanceRequest newItem) {
+                    return oldItem.getId() != null && oldItem.getId().equals(newItem.getId());
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull AdvanceRequest oldItem,
+                                                  @NonNull AdvanceRequest newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
     private final NumberFormat currencyFormat =
             NumberFormat.getCurrencyInstance(new Locale("tr", "TR"));
 
+    public AdvanceHistoryAdapter() {
+        super(DIFF_CALLBACK);
+    }
+
+    /** Geriye dönük uyumlu setItems — artık DiffUtil üzerinden çalışır. */
     public void setItems(List<AdvanceRequest> items) {
-        this.items = items;
-        notifyDataSetChanged();
+        submitList(items != null ? new ArrayList<>(items) : null);
     }
 
     @NonNull
@@ -39,7 +59,7 @@ public class AdvanceHistoryAdapter extends RecyclerView.Adapter<AdvanceHistoryAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        AdvanceRequest item = items.get(position);
+        AdvanceRequest item = getItem(position);
 
         // Tutar
         holder.tvAmount.setText(currencyFormat.format(item.getAmount()));
@@ -83,9 +103,6 @@ public class AdvanceHistoryAdapter extends RecyclerView.Adapter<AdvanceHistoryAd
                 Color.red(statusColor), Color.green(statusColor), Color.blue(statusColor)));
         holder.tvStatus.setBackground(bg);
     }
-
-    @Override
-    public int getItemCount() { return items.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvAmount, tvReason, tvDate, tvStatus;

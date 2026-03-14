@@ -41,4 +41,25 @@ public class LateEarlyRecord {
             case "early":     return "Erken Çıktı";
             default:          return type;
         }
-    }}
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LateEarlyRecord that = (LateEarlyRecord) o;
+        return differenceMinutes == that.differenceMinutes
+                && java.util.Objects.equals(personnelName, that.personnelName)
+                && java.util.Objects.equals(department, that.department)
+                && java.util.Objects.equals(type, that.type)
+                && java.util.Objects.equals(scheduledTime, that.scheduledTime)
+                && java.util.Objects.equals(actualTime, that.actualTime)
+                && java.util.Objects.equals(date, that.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(personnelName, department, type,
+                scheduledTime, actualTime, differenceMinutes, date);
+    }
+}

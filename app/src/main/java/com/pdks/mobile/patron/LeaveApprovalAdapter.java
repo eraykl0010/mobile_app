@@ -8,6 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
@@ -16,31 +18,47 @@ import com.pdks.mobile.model.LeaveRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LeaveApprovalAdapter extends RecyclerView.Adapter<LeaveApprovalAdapter.ViewHolder> {
+public class LeaveApprovalAdapter extends ListAdapter<LeaveRequest, LeaveApprovalAdapter.ViewHolder> {
 
     public interface OnActionListener {
         void onApprove(LeaveRequest item, int position);
         void onReject(LeaveRequest item, int position);
     }
 
-    private List<LeaveRequest> items = new ArrayList<>();
+    private static final DiffUtil.ItemCallback<LeaveRequest> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<LeaveRequest>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull LeaveRequest oldItem,
+                                               @NonNull LeaveRequest newItem) {
+                    return oldItem.getId() != null && oldItem.getId().equals(newItem.getId());
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull LeaveRequest oldItem,
+                                                  @NonNull LeaveRequest newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
     private final OnActionListener listener;
     private final boolean showButtons;
 
     public LeaveApprovalAdapter(OnActionListener listener, boolean showButtons) {
+        super(DIFF_CALLBACK);
         this.listener = listener;
         this.showButtons = showButtons;
     }
 
+    /** Geriye dönük uyumlu setItems — artık DiffUtil üzerinden çalışır. */
     public void setItems(List<LeaveRequest> items) {
-        this.items = items;
-        notifyDataSetChanged();
+        submitList(items != null ? new ArrayList<>(items) : null);
     }
 
     public void removeItem(int position) {
-        if (position >= 0 && position < items.size()) {
-            items.remove(position);
-            notifyItemRemoved(position);
+        List<LeaveRequest> current = new ArrayList<>(getCurrentList());
+        if (position >= 0 && position < current.size()) {
+            current.remove(position);
+            submitList(current);
         }
     }
 
@@ -54,7 +72,7 @@ public class LeaveApprovalAdapter extends RecyclerView.Adapter<LeaveApprovalAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        LeaveRequest item = items.get(position);
+        LeaveRequest item = getItem(position);
 
         holder.tvPersonnelName.setText(item.getPersonnelName());
 
@@ -124,9 +142,6 @@ public class LeaveApprovalAdapter extends RecyclerView.Adapter<LeaveApprovalAdap
             holder.btnReject.setVisibility(View.GONE);
         }
     }
-
-    @Override
-    public int getItemCount() { return items.size(); }
 
     /** Null/boş string koruması — boş yerine fallback döner */
     private String safe(String value) {

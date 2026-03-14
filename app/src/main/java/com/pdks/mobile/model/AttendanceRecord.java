@@ -44,4 +44,23 @@ public class AttendanceRecord {
             default: return status;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AttendanceRecord that = (AttendanceRecord) o;
+        return java.util.Objects.equals(date, that.date)
+                && java.util.Objects.equals(dayName, that.dayName)
+                && java.util.Objects.equals(checkIn, that.checkIn)
+                && java.util.Objects.equals(checkOut, that.checkOut)
+                && java.util.Objects.equals(workHours, that.workHours)
+                && java.util.Objects.equals(overtimeHours, that.overtimeHours)
+                && java.util.Objects.equals(status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(date, dayName, checkIn, checkOut, workHours, overtimeHours, status);
+    }
 }

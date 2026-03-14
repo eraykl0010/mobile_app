@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
@@ -16,13 +18,32 @@ import com.pdks.mobile.model.AttendanceRecord;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.ViewHolder> {
+public class AttendanceAdapter extends ListAdapter<AttendanceRecord, AttendanceAdapter.ViewHolder> {
 
-    private List<AttendanceRecord> items = new ArrayList<>();
+    private static final DiffUtil.ItemCallback<AttendanceRecord> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<AttendanceRecord>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull AttendanceRecord oldItem,
+                                               @NonNull AttendanceRecord newItem) {
+                    // ID yok — tarih benzersiz anahtar olarak kullanılıyor
+                    return oldItem.getDate() != null
+                            && oldItem.getDate().equals(newItem.getDate());
+                }
 
+                @Override
+                public boolean areContentsTheSame(@NonNull AttendanceRecord oldItem,
+                                                  @NonNull AttendanceRecord newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
+    public AttendanceAdapter() {
+        super(DIFF_CALLBACK);
+    }
+
+    /** Geriye dönük uyumlu setItems — artık DiffUtil üzerinden çalışır. */
     public void setItems(List<AttendanceRecord> items) {
-        this.items = items;
-        notifyDataSetChanged();
+        submitList(items != null ? new ArrayList<>(items) : null);
     }
 
     @NonNull
@@ -35,7 +56,7 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        AttendanceRecord item = items.get(position);
+        AttendanceRecord item = getItem(position);
 
         // Tarihten gün numarasını çıkar — format: "dd.MM.yyyy"
         String date = item.getDate();
@@ -76,11 +97,6 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.Vi
         bg.setColor(Color.argb(25,
                 Color.red(statusColor), Color.green(statusColor), Color.blue(statusColor)));
         holder.tvStatus.setBackground(bg);
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

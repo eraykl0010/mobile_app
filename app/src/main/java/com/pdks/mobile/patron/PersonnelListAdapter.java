@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
@@ -16,18 +18,37 @@ import com.pdks.mobile.model.PersonnelInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersonnelListAdapter extends RecyclerView.Adapter<PersonnelListAdapter.ViewHolder> {
+public class PersonnelListAdapter extends ListAdapter<PersonnelInfo, PersonnelListAdapter.ViewHolder> {
 
     // ── Long-press callback ──
     public interface OnItemLongClickListener {
         void onItemLongClick(PersonnelInfo item, int position);
     }
 
+    private static final DiffUtil.ItemCallback<PersonnelInfo> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<PersonnelInfo>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull PersonnelInfo oldItem,
+                                               @NonNull PersonnelInfo newItem) {
+                    return oldItem.getId() == newItem.getId();
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull PersonnelInfo oldItem,
+                                                  @NonNull PersonnelInfo newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
+    /** Filtrelenmemiş tam liste — filtreleme bu kaynak üzerinden yapılır. */
     private List<PersonnelInfo> allItems = new ArrayList<>();
-    private List<PersonnelInfo> filteredItems = new ArrayList<>();
     private String currentDepartment = null;
     private String currentStatus = null;
     private OnItemLongClickListener longClickListener;
+
+    public PersonnelListAdapter() {
+        super(DIFF_CALLBACK);
+    }
 
     public void setOnItemLongClickListener(OnItemLongClickListener listener) {
         this.longClickListener = listener;
@@ -61,7 +82,7 @@ public class PersonnelListAdapter extends RecyclerView.Adapter<PersonnelListAdap
     }
 
     private void applyFilters() {
-        filteredItems = new ArrayList<>();
+        List<PersonnelInfo> filtered = new ArrayList<>();
         for (PersonnelInfo p : allItems) {
             boolean deptMatch = (currentDepartment == null || currentDepartment.isEmpty()
                     || currentDepartment.equals(p.getDepartment()));
@@ -69,10 +90,10 @@ public class PersonnelListAdapter extends RecyclerView.Adapter<PersonnelListAdap
                     || currentStatus.equals(p.getStatus()));
 
             if (deptMatch && statusMatch) {
-                filteredItems.add(p);
+                filtered.add(p);
             }
         }
-        notifyDataSetChanged();
+        submitList(filtered);
     }
 
     public String getCurrentStatus() {
@@ -89,7 +110,7 @@ public class PersonnelListAdapter extends RecyclerView.Adapter<PersonnelListAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder h, int position) {
-        PersonnelInfo item = filteredItems.get(position);
+        PersonnelInfo item = getItem(position);
 
         h.tvName.setText(item.getName());
         h.tvDept.setText(item.getDepartment());
@@ -124,9 +145,6 @@ public class PersonnelListAdapter extends RecyclerView.Adapter<PersonnelListAdap
             return false;
         });
     }
-
-    @Override
-    public int getItemCount() { return filteredItems.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         View viewIndicator;

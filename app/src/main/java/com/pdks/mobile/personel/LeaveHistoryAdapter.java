@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
@@ -16,13 +18,30 @@ import com.pdks.mobile.model.LeaveRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LeaveHistoryAdapter extends RecyclerView.Adapter<LeaveHistoryAdapter.ViewHolder> {
+public class LeaveHistoryAdapter extends ListAdapter<LeaveRequest, LeaveHistoryAdapter.ViewHolder> {
 
-    private List<LeaveRequest> items = new ArrayList<>();
+    private static final DiffUtil.ItemCallback<LeaveRequest> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<LeaveRequest>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull LeaveRequest oldItem,
+                                               @NonNull LeaveRequest newItem) {
+                    return oldItem.getId() != null && oldItem.getId().equals(newItem.getId());
+                }
 
+                @Override
+                public boolean areContentsTheSame(@NonNull LeaveRequest oldItem,
+                                                  @NonNull LeaveRequest newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
+    public LeaveHistoryAdapter() {
+        super(DIFF_CALLBACK);
+    }
+
+    /** Geriye dönük uyumlu setItems — artık DiffUtil üzerinden çalışır. */
     public void setItems(List<LeaveRequest> items) {
-        this.items = items;
-        notifyDataSetChanged();
+        submitList(items != null ? new ArrayList<>(items) : null);
     }
 
     @NonNull
@@ -35,7 +54,7 @@ public class LeaveHistoryAdapter extends RecyclerView.Adapter<LeaveHistoryAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        LeaveRequest item = items.get(position);
+        LeaveRequest item = getItem(position);
 
         holder.tvType.setText(item.getLeaveTypeDisplay());
 
@@ -78,9 +97,6 @@ public class LeaveHistoryAdapter extends RecyclerView.Adapter<LeaveHistoryAdapte
                 Color.red(statusColor), Color.green(statusColor), Color.blue(statusColor)));
         holder.tvStatus.setBackground(bg);
     }
-
-    @Override
-    public int getItemCount() { return items.size(); }
 
     private String safe(String value) {
         return (value != null && !value.isEmpty()) ? value : "-";
