@@ -30,33 +30,23 @@ import com.pdks.mobile.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class PersonnelDetailActivity extends AppCompatActivity {
 
     private static final String TAG = "PersonnelDetail";
-    private static final int DETAIL_REFRESH_CALL_COUNT = 2;
 
     private ActivityPersonnelDetailBinding binding;
     private ApiService apiService;
     private SessionManager sessionManager;
     private PersonnelListAdapter adapter;
-
     private List<Department> departments = new ArrayList<>();
+
+    // Hangi kutu seçili
     private View selectedBox = null;
-
-    private Integer selectedDepartmentId = null;
-    private int selectedDepartmentSpinnerPosition = 0;
-
-    private String activeStatusFilterLabel = null;
-    private int pendingRefreshCalls = 0;
-    private boolean isFirstResume = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = ActivityPersonnelDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -72,61 +62,19 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         binding.rvPersonnelList.setLayoutManager(new LinearLayoutManager(this));
         binding.rvPersonnelList.setAdapter(adapter);
 
+        // ── Personele uzun basınca seçenek menüsü ──
         adapter.setOnItemLongClickListener((item, position) -> showPersonnelOptionsDialog(item));
 
-        setupSwipeRefresh();
         setupBoxClickListeners();
         setupClearFilter();
-
         loadDepartments();
-        refreshContent();
+        loadPersonnelList();
+        loadSummary(null);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (isFirstResume) {
-            isFirstResume = false;
-            return;
-        }
-
-        refreshContent();
-    }
-
-    private void setupSwipeRefresh() {
-        binding.swipeRefreshPersonnelDetail.setColorSchemeResources(R.color.primary);
-
-        binding.swipeRefreshPersonnelDetail.setOnChildScrollUpCallback(
-                (parent, child) -> binding.rvPersonnelList.canScrollVertically(-1)
-        );
-
-        binding.swipeRefreshPersonnelDetail.setOnRefreshListener(() -> {
-            loadDepartments();
-            refreshContent();
-        });
-    }
-
-    private void beginRefresh(int requestCount) {
-        pendingRefreshCalls = requestCount;
-        binding.swipeRefreshPersonnelDetail.setRefreshing(true);
-    }
-
-    private void finishRefreshRequest() {
-        if (pendingRefreshCalls > 0) {
-            pendingRefreshCalls--;
-        }
-
-        if (pendingRefreshCalls == 0) {
-            binding.swipeRefreshPersonnelDetail.setRefreshing(false);
-        }
-    }
-
-    private void refreshContent() {
-        beginRefresh(DETAIL_REFRESH_CALL_COUNT);
-        loadPersonnelList(true);
-        loadSummary(selectedDepartmentId, true);
-    }
+    // ══════════════════════════════════════════════════
+    //  CİHAZ SIFIRLAMA — Personele uzun basınca açılır
+    // ══════════════════════════════════════════════════
 
     private void showPersonnelOptionsDialog(PersonnelInfo item) {
         String[] options = {"Cihaz Kaydını Sıfırla"};
@@ -157,40 +105,30 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         int patronId = sessionManager.getPersonnelId();
         ResetDeviceRequest req = new ResetDeviceRequest(item.getId(), patronId);
 
-        apiService.resetDevice(req).enqueue(new Callback<ApiResponse>() {
+        apiService.resetDevice(req).enqueue(new BaseApiCallback<ApiResponse>(this) {
             @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> resp) {
-                if (resp.isSuccessful() && resp.body() != null && resp.body().isSuccess()) {
-                    Toast.makeText(
-                            PersonnelDetailActivity.this,
+            public void onSuccess(@NonNull ApiResponse data) {
+                if (data.isSuccess()) {
+                    Toast.makeText(PersonnelDetailActivity.this,
                             item.getName() + " — cihaz kaydı sıfırlandı",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
-                    refreshContent();
+                            Toast.LENGTH_SHORT).show();
                 } else {
-                    String msg = "İşlem başarısız";
-                    if (resp.body() != null && resp.body().getMessage() != null) {
-                        msg = resp.body().getMessage();
-                    }
+                    String msg = data.getMessage() != null ? data.getMessage() : "İşlem başarısız";
                     Toast.makeText(PersonnelDetailActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                Toast.makeText(
-                        PersonnelDetailActivity.this,
-                        "Bağlantı hatası: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
             }
         });
     }
 
+    // ══════════════════════════════════════════════════
+    //  KUTU FİLTRELEME
+    // ══════════════════════════════════════════════════
+
     private void setupBoxClickListeners() {
         binding.boxActive.setOnClickListener(v -> applyStatusFilter(v, "active", "Aktif Çalışanlar"));
-        binding.boxTotal.setOnClickListener(v -> clearFilter());
+        binding.boxTotal.setOnClickListener(v -> {
+            clearFilter();
+        });
         binding.boxLeave.setOnClickListener(v -> applyStatusFilter(v, "on_leave", "İzinli Personel"));
         binding.boxAbsent.setOnClickListener(v -> applyStatusFilter(v, "absent", "Devamsız Personel"));
         binding.boxLate.setOnClickListener(v -> applyStatusFilter(v, "late", "Geç Gelen Personel"));
@@ -204,47 +142,28 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         }
 
         resetBoxHighlights();
-        selectedBox = box;
-        activeStatusFilterLabel = label;
 
+        selectedBox = box;
         highlightBox(box, true);
+
         adapter.filterByStatus(status);
 
         binding.tvActiveFilter.setText("Filtre: " + label);
         binding.layoutActiveFilter.setVisibility(View.VISIBLE);
 
-        updateListTitle();
+        binding.tvListTitle.setText(label + " (" + adapter.getItemCount() + ")");
     }
 
     private void clearFilter() {
-        selectedBox = null;
-        activeStatusFilterLabel = null;
-
         resetBoxHighlights();
+        selectedBox = null;
         adapter.clearStatusFilter();
-
         binding.layoutActiveFilter.setVisibility(View.GONE);
-        updateListTitle();
-    }
-
-    private void clearFilterUiOnly() {
-        selectedBox = null;
-        activeStatusFilterLabel = null;
-
-        resetBoxHighlights();
-        binding.layoutActiveFilter.setVisibility(View.GONE);
+        binding.tvListTitle.setText("Personel Listesi");
     }
 
     private void setupClearFilter() {
         binding.btnClearFilter.setOnClickListener(v -> clearFilter());
-    }
-
-    private void updateListTitle() {
-        if (activeStatusFilterLabel != null && !activeStatusFilterLabel.isEmpty()) {
-            binding.tvListTitle.setText(activeStatusFilterLabel + " (" + adapter.getItemCount() + ")");
-        } else {
-            binding.tvListTitle.setText("Personel Listesi");
-        }
     }
 
     private void highlightBox(View box, boolean selected) {
@@ -272,6 +191,10 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         return (int) (dp * getResources().getDisplayMetrics().density);
     }
 
+    // ══════════════════════════════════════════════════
+    //  VERİ YÜKLEME
+    // ══════════════════════════════════════════════════
+
     private void loadDepartments() {
         apiService.getDepartments().enqueue(new BaseApiCallback<List<Department>>(this) {
             @Override
@@ -282,6 +205,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
 
             @Override
             public void onNetworkError(@NonNull Throwable t) {
+                // Departman yüklenemese bile spinner boş açılsın
                 setupSpinner();
             }
         });
@@ -290,64 +214,37 @@ public class PersonnelDetailActivity extends AppCompatActivity {
     private void setupSpinner() {
         List<String> items = new ArrayList<>();
         items.add("Tüm Departmanlar");
+        for (Department d : departments) items.add(d.getName());
 
-        for (Department d : departments) {
-            items.add(d.getName());
-        }
+        ArrayAdapter<String> a = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, items);
+        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerDetailDept.setAdapter(a);
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                items
-        );
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        binding.spinnerDetailDept.setOnItemSelectedListener(null);
-        binding.spinnerDetailDept.setAdapter(spinnerAdapter);
-
-        if (selectedDepartmentSpinnerPosition > departments.size()) {
-            selectedDepartmentSpinnerPosition = 0;
-            selectedDepartmentId = null;
-            adapter.filterByDepartment(null);
-        }
-
-        binding.spinnerDetailDept.setSelection(selectedDepartmentSpinnerPosition, false);
-        attachDepartmentSpinnerListener();
-    }
-
-    private void attachDepartmentSpinnerListener() {
         binding.spinnerDetailDept.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                selectedDepartmentSpinnerPosition = pos;
-
-                clearFilterUiOnly();
+            public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                selectedBox = null;
+                resetBoxHighlights();
+                binding.layoutActiveFilter.setVisibility(View.GONE);
+                binding.tvListTitle.setText("Personel Listesi");
 
                 if (pos == 0) {
-                    selectedDepartmentId = null;
                     adapter.filterByDepartment(null);
-                    loadSummary(null, false);
+                    loadSummary(null);
                 } else {
-                    Department selectedDepartment = departments.get(pos - 1);
-                    selectedDepartmentId = selectedDepartment.getId();
-                    adapter.filterByDepartment(selectedDepartment.getName());
-                    loadSummary(selectedDepartmentId, false);
+                    String deptName = departments.get(pos - 1).getName();
+                    adapter.filterByDepartment(deptName);
+                    loadSummary(departments.get(pos - 1).getId());
                 }
-
-                updateListTitle();
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+            public void onNothingSelected(AdapterView<?> p) {}
         });
     }
 
-    private void loadPersonnelList(boolean trackRefresh) {
-        if (!binding.swipeRefreshPersonnelDetail.isRefreshing()) {
-            binding.progressDetail.setVisibility(View.VISIBLE);
-        }
-
+    private void loadPersonnelList() {
+        binding.progressDetail.setVisibility(View.VISIBLE);
         Log.d(TAG, "loadPersonnelList → istek gönderiliyor...");
 
         apiService.getPersonnelList(null).enqueue(new BaseApiCallback<List<PersonnelInfo>>(this) {
@@ -355,7 +252,6 @@ public class PersonnelDetailActivity extends AppCompatActivity {
             public void onSuccess(@NonNull List<PersonnelInfo> data) {
                 Log.d(TAG, "loadPersonnelList → " + data.size() + " kayıt geldi");
                 adapter.setItems(data);
-                updateListTitle();
 
                 if (adapter.getItemCount() == 0) {
                     Log.w(TAG, "loadPersonnelList → Liste boş (filtreleme sonrası)");
@@ -365,69 +261,47 @@ public class PersonnelDetailActivity extends AppCompatActivity {
             @Override
             public void onEmpty() {
                 Log.e(TAG, "loadPersonnelList → 200 ama body null");
-                adapter.setItems(new ArrayList<>());
-                updateListTitle();
-
-                Toast.makeText(
-                        PersonnelDetailActivity.this,
-                        "Personel listesi boş döndü",
-                        Toast.LENGTH_LONG
-                ).show();
+                Toast.makeText(PersonnelDetailActivity.this,
+                        "Personel listesi boş döndü", Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onApiError(int httpCode, String errorBody) {
-                Log.e(TAG, "loadPersonnelList → HTTP " + httpCode + " → " + errorBody);
-                Toast.makeText(
-                        PersonnelDetailActivity.this,
+            public void onApiError(int httpCode, @androidx.annotation.Nullable String errorBody) {
+                Log.e(TAG, "loadPersonnelList → HTTP " + httpCode
+                        + (errorBody != null ? " → " + errorBody : ""));
+                Toast.makeText(PersonnelDetailActivity.this,
                         "Personel listesi yüklenemedi (HTTP " + httpCode + ")",
-                        Toast.LENGTH_LONG
-                ).show();
+                        Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onNetworkError(@NonNull Throwable t) {
-                Log.e(TAG, "loadPersonnelList → HATA: "
-                        + t.getClass().getSimpleName()
-                        + " → "
-                        + t.getMessage(), t);
-
-                Toast.makeText(
-                        PersonnelDetailActivity.this,
+                Log.e(TAG, "loadPersonnelList → HATA: " + t.getClass().getSimpleName()
+                        + " → " + t.getMessage(), t);
+                Toast.makeText(PersonnelDetailActivity.this,
                         "Personel listesi hatası: " + t.getMessage(),
-                        Toast.LENGTH_LONG
-                ).show();
+                        Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onFinally() {
                 binding.progressDetail.setVisibility(View.GONE);
-
-                if (trackRefresh) {
-                    finishRefreshRequest();
-                }
             }
         });
     }
 
-    private void loadSummary(Integer deptId, boolean trackRefresh) {
-        apiService.getDashboardSummary(deptId).enqueue(new BaseApiCallback<DashboardSummary>(this) {
-            @Override
-            public void onSuccess(@NonNull DashboardSummary s) {
-                binding.tvDetActive.setText(String.valueOf(s.getActiveCount()));
-                binding.tvDetTotal.setText(String.valueOf(s.getTotalCount()));
-                binding.tvDetLeave.setText(String.valueOf(s.getOnLeaveCount()));
-                binding.tvDetAbsent.setText(String.valueOf(s.getAbsentCount()));
-                binding.tvDetLate.setText(String.valueOf(s.getLateCount()));
-                binding.tvDetEarly.setText(String.valueOf(s.getEarlyLeaveCount()));
-            }
-
-            @Override
-            public void onFinally() {
-                if (trackRefresh) {
-                    finishRefreshRequest();
-                }
-            }
-        });
+    private void loadSummary(Integer deptId) {
+        apiService.getDashboardSummary(deptId).enqueue(
+                new BaseApiCallback<DashboardSummary>(null) {
+                    @Override
+                    public void onSuccess(@NonNull DashboardSummary data) {
+                        binding.tvDetActive.setText(String.valueOf(data.getActiveCount()));
+                        binding.tvDetTotal.setText(String.valueOf(data.getTotalCount()));
+                        binding.tvDetLeave.setText(String.valueOf(data.getOnLeaveCount()));
+                        binding.tvDetAbsent.setText(String.valueOf(data.getAbsentCount()));
+                        binding.tvDetLate.setText(String.valueOf(data.getLateCount()));
+                        binding.tvDetEarly.setText(String.valueOf(data.getEarlyLeaveCount()));
+                    }
+                });
     }
 }

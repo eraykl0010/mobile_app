@@ -5,10 +5,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.databinding.ActivityLoginBinding;
 import com.pdks.mobile.model.LoginRequest;
@@ -16,10 +19,6 @@ import com.pdks.mobile.model.LoginResponse;
 import com.pdks.mobile.patron.PatronDashboardActivity;
 import com.pdks.mobile.personel.PersonelDashboardActivity;
 import com.pdks.mobile.util.SessionManager;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -85,42 +84,37 @@ public class LoginActivity extends AppCompatActivity {
                 macAddress
         );
 
-        apiService.login(request).enqueue(new Callback<LoginResponse>() {
+        apiService.login(request).enqueue(new BaseApiCallback<LoginResponse>(this) {
             @Override
-            public void onResponse(Call<LoginResponse> call,
-                                   Response<LoginResponse> response) {
-                setLoading(false);
-
-                if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse loginResp = response.body();
-
-                    if (loginResp.isSuccess()) {
-                        handleSuccessLogin(loginResp, companyCode, cardNo);
+            public void onSuccess(@NonNull LoginResponse data) {
+                if (data.isSuccess()) {
+                    handleSuccessLogin(data, companyCode, cardNo);
+                } else {
+                    String message = data.getMessage();
+                    if (message != null && (message.contains("cihaz") || message.contains("device"))) {
+                        showDeviceBindingError(message);
                     } else {
-                        String message = loginResp.getMessage();
-                        if (message != null && (message.contains("cihaz") || message.contains("device"))) {
-                            showDeviceBindingError(message);
-                        } else {
-                            Toast.makeText(LoginActivity.this,
-                                    message, Toast.LENGTH_LONG).show();
-                        }
+                        Toast.makeText(LoginActivity.this,
+                                message, Toast.LENGTH_LONG).show();
                     }
-                } else if (response.code() == 403) {
+                }
+            }
+
+            @Override
+            public void onApiError(int httpCode, @Nullable String errorBody) {
+                if (httpCode == 403) {
                     showDeviceBindingError(
                             "Bu cihaz başka bir personele kayıtlıdır veya " +
                                     "bu hesap başka bir cihaza bağlıdır. " +
                                     "Lütfen yöneticinize başvurun.");
                 } else {
-                    Toast.makeText(LoginActivity.this,
-                            "Sunucu hatası: " + response.code(), Toast.LENGTH_LONG).show();
+                    super.onApiError(httpCode, errorBody);
                 }
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFinally() {
                 setLoading(false);
-                Toast.makeText(LoginActivity.this,
-                        "Bağlantı hatası: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

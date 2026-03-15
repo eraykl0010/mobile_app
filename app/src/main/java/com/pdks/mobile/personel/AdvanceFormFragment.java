@@ -15,14 +15,11 @@ import androidx.fragment.app.Fragment;
 
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.AdvanceSubmitRequest;
 import com.pdks.mobile.model.ApiResponse;
 import com.pdks.mobile.util.SessionManager;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class AdvanceFormFragment extends Fragment {
 
@@ -87,32 +84,27 @@ public class AdvanceFormFragment extends Fragment {
         );
 
         ApiService api = RetrofitClient.getClient(requireContext()).create(ApiService.class);
-        api.submitAdvanceRequest(req).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> resp) {
-                progressBar.setVisibility(View.GONE);
-                btnSubmit.setEnabled(true);
-
-                if (resp.isSuccessful() && resp.body() != null && resp.body().isSuccess()) {
-                    Toast.makeText(requireContext(), "Avans talebi gönderildi", Toast.LENGTH_SHORT).show();
-                    etAmount.setText("");
-                    etReason.setText("");
-                } else {
-                    String msg = "Talep gönderilemedi";
-                    if (resp.body() != null && resp.body().getMessage() != null) {
-                        msg = resp.body().getMessage();
+        api.submitAdvanceRequest(req).enqueue(
+                new BaseApiCallback<ApiResponse>(getContext()) {
+                    @Override
+                    public void onSuccess(@NonNull ApiResponse data) {
+                        if (data.isSuccess()) {
+                            Toast.makeText(requireContext(),
+                                    "Avans talebi gönderildi", Toast.LENGTH_SHORT).show();
+                            etAmount.setText("");
+                            etReason.setText("");
+                        } else {
+                            String msg = data.getMessage() != null
+                                    ? data.getMessage() : "Talep gönderilemedi";
+                            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                        }
                     }
-                    Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                btnSubmit.setEnabled(true);
-                Toast.makeText(requireContext(), "Bağlantı hatası: " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
-            }
-        });
+                    @Override
+                    public void onFinally() {
+                        progressBar.setVisibility(View.GONE);
+                        btnSubmit.setEnabled(true);
+                    }
+                });
     }
 }

@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.CheckInOutRequest;
 import com.pdks.mobile.model.CheckInOutResponse;
@@ -32,10 +33,6 @@ import com.pdks.mobile.util.ViewUtils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LocationCheckInActivity extends AppCompatActivity {
 
@@ -141,38 +138,41 @@ public class LocationCheckInActivity extends AppCompatActivity {
                 sessionManager.getDeviceId()
         );
 
-        apiService.checkInOut(request).enqueue(new Callback<CheckInOutResponse>() {
-            @Override
-            public void onResponse(Call<CheckInOutResponse> call, Response<CheckInOutResponse> resp) {
-                progressBar.setVisibility(View.GONE);
+        apiService.checkInOut(request).enqueue(
+                new BaseApiCallback<CheckInOutResponse>(this) {
+                    @Override
+                    public void onSuccess(@NonNull CheckInOutResponse data) {
+                        if (data.isSuccess()) {
+                            tvResult.setVisibility(View.VISIBLE);
+                            tvResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
+                            tvResult.setTextColor(getColor(R.color.status_success));
+                            // Başarılı işlem sonrası buton 3 sn kilitli kalsın — mükerrer kayıt önlenir
+                            btnCheckInOut.postDelayed(() -> btnCheckInOut.setEnabled(true), 3000);
+                        } else {
+                            tvResult.setVisibility(View.VISIBLE);
+                            tvResult.setText(data.getMessage());
+                            tvResult.setTextColor(getColor(R.color.status_danger));
+                            btnCheckInOut.setEnabled(true);
+                        }
+                    }
 
-                if (resp.isSuccessful() && resp.body() != null) {
-                    CheckInOutResponse result = resp.body();
-                    if (result.isSuccess()) {
-                        tvResult.setVisibility(View.VISIBLE);
-                        tvResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
-                        tvResult.setTextColor(getColor(R.color.status_success));
-                        // Başarılı işlem sonrası buton 3 sn kilitli kalsın — mükerrer kayıt önlenir
-                        btnCheckInOut.postDelayed(() -> btnCheckInOut.setEnabled(true), 3000);
-                    } else {
-                        tvResult.setVisibility(View.VISIBLE);
-                        tvResult.setText(result.getMessage());
-                        tvResult.setTextColor(getColor(R.color.status_danger));
+                    @Override
+                    public void onApiError(int httpCode, @androidx.annotation.Nullable String errorBody) {
+                        super.onApiError(httpCode, errorBody);
                         btnCheckInOut.setEnabled(true);
                     }
-                } else {
-                    btnCheckInOut.setEnabled(true);
-                }
-            }
 
-            @Override
-            public void onFailure(Call<CheckInOutResponse> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                btnCheckInOut.setEnabled(true);
-                Toast.makeText(LocationCheckInActivity.this,
-                        "Bağlantı hatası", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onNetworkError(@NonNull Throwable t) {
+                        super.onNetworkError(t);
+                        btnCheckInOut.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onFinally() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
     }
 
     @Override

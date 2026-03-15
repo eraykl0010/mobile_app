@@ -2,14 +2,15 @@ package com.pdks.mobile.patron;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.databinding.ActivityLateEarlyListBinding;
 import com.pdks.mobile.model.LateEarlyRecord;
@@ -17,10 +18,6 @@ import com.pdks.mobile.util.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LateEarlyListActivity extends AppCompatActivity {
 
@@ -68,24 +65,19 @@ public class LateEarlyListActivity extends AppCompatActivity {
         binding.progressLateEarly.setVisibility(View.VISIBLE);
 
         ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
-        apiService.getLateEarlyReport(null).enqueue(new Callback<List<LateEarlyRecord>>() {
-            @Override
-            public void onResponse(Call<List<LateEarlyRecord>> call,
-                                   Response<List<LateEarlyRecord>> resp) {
-                binding.progressLateEarly.setVisibility(View.GONE);
-                if (resp.isSuccessful() && resp.body() != null) {
-                    allRecords = resp.body();
-                    filterAndShow();
-                }
-            }
+        apiService.getLateEarlyReport(null).enqueue(
+                new BaseApiCallback<List<LateEarlyRecord>>(this) {
+                    @Override
+                    public void onSuccess(@NonNull List<LateEarlyRecord> data) {
+                        allRecords = data;
+                        filterAndShow();
+                    }
 
-            @Override
-            public void onFailure(Call<List<LateEarlyRecord>> call, Throwable t) {
-                binding.progressLateEarly.setVisibility(View.GONE);
-                Toast.makeText(LateEarlyListActivity.this,
-                        "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onFinally() {
+                        binding.progressLateEarly.setVisibility(View.GONE);
+                    }
+                });
     }
 
     private void filterAndShow() {

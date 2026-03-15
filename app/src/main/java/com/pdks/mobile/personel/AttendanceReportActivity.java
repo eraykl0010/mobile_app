@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,16 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.AttendanceRecord;
 import com.pdks.mobile.util.SessionManager;
 import com.pdks.mobile.util.ViewUtils;
 
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class AttendanceReportActivity extends AppCompatActivity {
 
@@ -79,28 +76,25 @@ public class AttendanceReportActivity extends AppCompatActivity {
 
     private void loadDailyReport() {
         progressBar.setVisibility(View.VISIBLE);
-        apiService.getDailyReport(personnelId).enqueue(new AttendanceCallback());
+        apiService.getDailyReport(personnelId).enqueue(newAttendanceCallback());
     }
 
     private void loadWeeklyReport() {
         progressBar.setVisibility(View.VISIBLE);
-        apiService.getWeeklyReport(personnelId).enqueue(new AttendanceCallback());
+        apiService.getWeeklyReport(personnelId).enqueue(newAttendanceCallback());
     }
 
-    private class AttendanceCallback implements Callback<List<AttendanceRecord>> {
-        @Override
-        public void onResponse(Call<List<AttendanceRecord>> call, Response<List<AttendanceRecord>> resp) {
-            progressBar.setVisibility(View.GONE);
-            if (resp.isSuccessful() && resp.body() != null) {
-                adapter.setItems(resp.body());
+    private BaseApiCallback<List<AttendanceRecord>> newAttendanceCallback() {
+        return new BaseApiCallback<List<AttendanceRecord>>(this) {
+            @Override
+            public void onSuccess(@NonNull List<AttendanceRecord> data) {
+                adapter.setItems(data);
             }
-        }
 
-        @Override
-        public void onFailure(Call<List<AttendanceRecord>> call, Throwable t) {
-            progressBar.setVisibility(View.GONE);
-            Toast.makeText(AttendanceReportActivity.this,
-                    "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+            @Override
+            public void onFinally() {
+                progressBar.setVisibility(View.GONE);
+            }
+        };
     }
 }

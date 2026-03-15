@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,16 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.AdvanceRequest;
 import com.pdks.mobile.util.DateSortHelper;
 import com.pdks.mobile.util.SessionManager;
 
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class AdvanceHistoryFragment extends Fragment {
 
@@ -59,28 +55,29 @@ public class AdvanceHistoryFragment extends Fragment {
         int personnelId = new SessionManager(requireContext()).getPersonnelId();
         ApiService api = RetrofitClient.getClient(requireContext()).create(ApiService.class);
 
-        api.getAdvanceHistory(personnelId).enqueue(new Callback<List<AdvanceRequest>>() {
-            @Override
-            public void onResponse(Call<List<AdvanceRequest>> call, Response<List<AdvanceRequest>> resp) {
-                progressBar.setVisibility(View.GONE);
-                if (resp.isSuccessful() && resp.body() != null) {
-                    if (resp.body().isEmpty()) {
-                        tvEmpty.setVisibility(View.VISIBLE);
-                    } else {
-                        tvEmpty.setVisibility(View.GONE);
-                        List<AdvanceRequest> list = resp.body();
-                        DateSortHelper.sortByDate(list, AdvanceRequest::getRequestDate);
-                        adapter.setItems(list);
+        api.getAdvanceHistory(personnelId).enqueue(
+                new BaseApiCallback<List<AdvanceRequest>>(getContext()) {
+                    @Override
+                    public void onSuccess(@NonNull List<AdvanceRequest> data) {
+                        if (data.isEmpty()) {
+                            tvEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            tvEmpty.setVisibility(View.GONE);
+                            DateSortHelper.sortByDate(data, AdvanceRequest::getRequestDate);
+                            adapter.setItems(data);
+                        }
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<List<AdvanceRequest>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onEmpty() {
+                        tvEmpty.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onFinally() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
     }
 
     @Override

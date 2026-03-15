@@ -6,7 +6,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,15 +17,15 @@ import com.pdks.mobile.model.MonthlyOvertime;
 import com.pdks.mobile.util.SessionManager;
 import com.pdks.mobile.util.ViewUtils;
 
+import androidx.annotation.NonNull;
+
+import com.pdks.mobile.api.BaseApiCallback;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MonthlyOvertimeActivity extends AppCompatActivity {
 
@@ -97,29 +96,24 @@ public class MonthlyOvertimeActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         cardSummary.setVisibility(View.GONE);
 
-        apiService.getMonthlyOvertime(personnelId, month).enqueue(new Callback<MonthlyOvertime>() {
-            @Override
-            public void onResponse(Call<MonthlyOvertime> call, Response<MonthlyOvertime> resp) {
-                progressBar.setVisibility(View.GONE);
-                if (resp.isSuccessful() && resp.body() != null) {
-                    cardSummary.setVisibility(View.VISIBLE);
-                    MonthlyOvertime data = resp.body();
+        apiService.getMonthlyOvertime(personnelId, month).enqueue(
+                new BaseApiCallback<MonthlyOvertime>(this) {
+                    @Override
+                    public void onSuccess(@NonNull MonthlyOvertime data) {
+                        cardSummary.setVisibility(View.VISIBLE);
 
-                    tvTotalWork.setText(String.format(Locale.US, "%.1f", data.getTotalWorkHours()));
-                    tvOvertime.setText(String.format(Locale.US, "%.1f", data.getTotalOvertimeHours()));
-                    tvWorkDays.setText(String.valueOf(data.getTotalWorkDays()));
-                    tvAbsent.setText(String.valueOf(data.getAbsentDays()));
-                    tvLate.setText(String.valueOf(data.getLateCount()));
-                    tvEarly.setText(String.valueOf(data.getEarlyLeaveCount()));
-                }
-            }
+                        tvTotalWork.setText(String.format(Locale.US, "%.1f", data.getTotalWorkHours()));
+                        tvOvertime.setText(String.format(Locale.US, "%.1f", data.getTotalOvertimeHours()));
+                        tvWorkDays.setText(String.valueOf(data.getTotalWorkDays()));
+                        tvAbsent.setText(String.valueOf(data.getAbsentDays()));
+                        tvLate.setText(String.valueOf(data.getLateCount()));
+                        tvEarly.setText(String.valueOf(data.getEarlyLeaveCount()));
+                    }
 
-            @Override
-            public void onFailure(Call<MonthlyOvertime> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(MonthlyOvertimeActivity.this,
-                        "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onFinally() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
     }
 }

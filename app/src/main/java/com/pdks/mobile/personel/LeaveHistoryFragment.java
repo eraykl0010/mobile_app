@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,16 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.LeaveRequest;
 import com.pdks.mobile.util.DateSortHelper;
 import com.pdks.mobile.util.SessionManager;
 
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LeaveHistoryFragment extends Fragment {
 
@@ -57,28 +53,29 @@ public class LeaveHistoryFragment extends Fragment {
         int personnelId = new SessionManager(requireContext()).getPersonnelId();
         ApiService api = RetrofitClient.getClient(requireContext()).create(ApiService.class);
 
-        api.getLeaveHistory(personnelId).enqueue(new Callback<List<LeaveRequest>>() {
-            @Override
-            public void onResponse(Call<List<LeaveRequest>> call, Response<List<LeaveRequest>> resp) {
-                progressBar.setVisibility(View.GONE);
-                if (resp.isSuccessful() && resp.body() != null) {
-                    if (resp.body().isEmpty()) {
-                        tvEmpty.setVisibility(View.VISIBLE);
-                    } else {
-                        tvEmpty.setVisibility(View.GONE);
-                        List<LeaveRequest> list = resp.body();
-                        DateSortHelper.sortByDate(list, LeaveRequest::getRequestDate);
-                        adapter.setItems(list);
+        api.getLeaveHistory(personnelId).enqueue(
+                new BaseApiCallback<List<LeaveRequest>>(getContext()) {
+                    @Override
+                    public void onSuccess(@NonNull List<LeaveRequest> data) {
+                        if (data.isEmpty()) {
+                            tvEmpty.setVisibility(View.VISIBLE);
+                        } else {
+                            tvEmpty.setVisibility(View.GONE);
+                            DateSortHelper.sortByDate(data, LeaveRequest::getRequestDate);
+                            adapter.setItems(data);
+                        }
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<List<LeaveRequest>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onEmpty() {
+                        tvEmpty.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onFinally() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
     }
 
     @Override

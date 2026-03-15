@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.AdvanceRequest;
 import com.pdks.mobile.model.ApiResponse;
@@ -24,8 +26,6 @@ import com.pdks.mobile.util.ViewUtils;
 import java.util.List;
 
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ApprovalListActivity extends AppCompatActivity {
 
@@ -104,26 +104,22 @@ public class ApprovalListActivity extends AppCompatActivity {
         rvApprovals.setAdapter(null);
 
         apiService.getPendingLeaveRequests(type, currentStatus)
-                .enqueue(new Callback<List<LeaveRequest>>() {
+                .enqueue(new BaseApiCallback<List<LeaveRequest>>(this) {
                     @Override
-                    public void onResponse(Call<List<LeaveRequest>> call, Response<List<LeaveRequest>> resp) {
-                        progressBar.setVisibility(View.GONE);
-                        if (resp.isSuccessful() && resp.body() != null) {
-                            List<LeaveRequest> list = resp.body();
-                            if (list.isEmpty()) {
-                                tvEmpty.setVisibility(View.VISIBLE);
-                                setEmptyMessage();
-                            } else {
-                                tvEmpty.setVisibility(View.GONE);
-                                DateSortHelper.sortByDate(list, LeaveRequest::getRequestDate);
-                                setupLeaveAdapter(list);
-                            }
+                    public void onSuccess(@NonNull List<LeaveRequest> data) {
+                        if (data.isEmpty()) {
+                            tvEmpty.setVisibility(View.VISIBLE);
+                            setEmptyMessage();
+                        } else {
+                            tvEmpty.setVisibility(View.GONE);
+                            DateSortHelper.sortByDate(data, LeaveRequest::getRequestDate);
+                            setupLeaveAdapter(data);
                         }
                     }
+
                     @Override
-                    public void onFailure(Call<List<LeaveRequest>> call, Throwable t) {
+                    public void onFinally() {
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(ApprovalListActivity.this, "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -156,26 +152,22 @@ public class ApprovalListActivity extends AppCompatActivity {
         rvApprovals.setAdapter(null);
 
         apiService.getPendingAdvanceRequests(currentStatus)
-                .enqueue(new Callback<List<AdvanceRequest>>() {
+                .enqueue(new BaseApiCallback<List<AdvanceRequest>>(this) {
                     @Override
-                    public void onResponse(Call<List<AdvanceRequest>> call, Response<List<AdvanceRequest>> resp) {
-                        progressBar.setVisibility(View.GONE);
-                        if (resp.isSuccessful() && resp.body() != null) {
-                            List<AdvanceRequest> list = resp.body();
-                            if (list.isEmpty()) {
-                                tvEmpty.setVisibility(View.VISIBLE);
-                                setEmptyMessage();
-                            } else {
-                                tvEmpty.setVisibility(View.GONE);
-                                DateSortHelper.sortByDate(list, AdvanceRequest::getRequestDate);
-                                setupAdvanceAdapter(list);
-                            }
+                    public void onSuccess(@NonNull List<AdvanceRequest> data) {
+                        if (data.isEmpty()) {
+                            tvEmpty.setVisibility(View.VISIBLE);
+                            setEmptyMessage();
+                        } else {
+                            tvEmpty.setVisibility(View.GONE);
+                            DateSortHelper.sortByDate(data, AdvanceRequest::getRequestDate);
+                            setupAdvanceAdapter(data);
                         }
                     }
+
                     @Override
-                    public void onFailure(Call<List<AdvanceRequest>> call, Throwable t) {
+                    public void onFinally() {
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(ApprovalListActivity.this, "Hata: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -209,10 +201,10 @@ public class ApprovalListActivity extends AppCompatActivity {
                 ? apiService.approveRequest(req)
                 : apiService.rejectRequest(req);
 
-        call.enqueue(new Callback<ApiResponse>() {
+        call.enqueue(new BaseApiCallback<ApiResponse>(this) {
             @Override
-            public void onResponse(Call<ApiResponse> c, Response<ApiResponse> resp) {
-                if (resp.isSuccessful() && resp.body() != null && resp.body().isSuccess()) {
+            public void onSuccess(@NonNull ApiResponse data) {
+                if (data.isSuccess()) {
                     String msg = "approve".equals(action) ? "Onaylandı" : "Reddedildi";
                     Toast.makeText(ApprovalListActivity.this, msg, Toast.LENGTH_SHORT).show();
 
@@ -227,10 +219,6 @@ public class ApprovalListActivity extends AppCompatActivity {
                         setEmptyMessage();
                     }
                 }
-            }
-            @Override
-            public void onFailure(Call<ApiResponse> c, Throwable t) {
-                Toast.makeText(ApprovalListActivity.this, "Bağlantı hatası", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -40,6 +40,7 @@ import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
+import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.model.CheckInOutRequest;
 import com.pdks.mobile.model.CheckInOutResponse;
@@ -49,10 +50,6 @@ import com.pdks.mobile.util.ViewUtils;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class QrCheckInActivity extends AppCompatActivity {
 
@@ -253,35 +250,40 @@ public class QrCheckInActivity extends AppCompatActivity {
                 sessionManager.getDeviceId()
         );
 
-        apiService.qrCheckInOut(request).enqueue(new Callback<CheckInOutResponse>() {
-            @Override
-            public void onResponse(Call<CheckInOutResponse> call,
-                                   Response<CheckInOutResponse> resp) {
-                progressScan.setVisibility(View.GONE);
-                if (resp.isSuccessful() && resp.body() != null) {
-                    CheckInOutResponse result = resp.body();
-                    tvScanResult.setVisibility(View.VISIBLE);
+        apiService.qrCheckInOut(request).enqueue(
+                new BaseApiCallback<CheckInOutResponse>(this) {
+                    @Override
+                    public void onSuccess(@NonNull CheckInOutResponse data) {
+                        tvScanResult.setVisibility(View.VISIBLE);
 
-                    if (result.isSuccess()) {
-                        tvScanResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
-                        tvScanResult.setTextColor(getColor(R.color.status_success));
-                        tvScanStatus.setText("İşlem tamamlandı");
-                    } else {
-                        tvScanResult.setText(result.getMessage());
-                        tvScanResult.setTextColor(getColor(R.color.status_danger));
-                        tvScanResult.postDelayed(() -> isProcessing = false, 3000);
+                        if (data.isSuccess()) {
+                            tvScanResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
+                            tvScanResult.setTextColor(getColor(R.color.status_success));
+                            tvScanStatus.setText("İşlem tamamlandı");
+                        } else {
+                            tvScanResult.setText(data.getMessage());
+                            tvScanResult.setTextColor(getColor(R.color.status_danger));
+                            tvScanResult.postDelayed(() -> isProcessing = false, 3000);
+                        }
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<CheckInOutResponse> call, Throwable t) {
-                progressScan.setVisibility(View.GONE);
-                Toast.makeText(QrCheckInActivity.this, "Bağlantı hatası",
-                        Toast.LENGTH_SHORT).show();
-                isProcessing = false;
-            }
-        });
+                    @Override
+                    public void onApiError(int httpCode, @androidx.annotation.Nullable String errorBody) {
+                        super.onApiError(httpCode, errorBody);
+                        isProcessing = false;
+                    }
+
+                    @Override
+                    public void onNetworkError(@NonNull Throwable t) {
+                        super.onNetworkError(t);
+                        isProcessing = false;
+                    }
+
+                    @Override
+                    public void onFinally() {
+                        progressScan.setVisibility(View.GONE);
+                    }
+                });
     }
 
     // ══════════════ QR OLUŞTUR (GENERATE) ══════════════
