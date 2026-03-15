@@ -27,9 +27,10 @@ import com.pdks.mobile.model.ApiResponse;
 import com.pdks.mobile.model.LeaveSubmitRequest;
 import com.pdks.mobile.util.SessionManager;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Locale;
 
 public class LeaveFormFragment extends Fragment {
 
@@ -40,8 +41,8 @@ public class LeaveFormFragment extends Fragment {
     private ProgressBar progressBar;
     private SessionManager sessionManager;
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
-    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     // İzin tip indexleri (spinner sırası ile aynı olmalı)
     private static final int TYPE_YILLIK  = 0;
@@ -145,8 +146,8 @@ public class LeaveFormFragment extends Fragment {
     private void showDatePicker(EditText target) {
         Calendar cal = Calendar.getInstance();
         new DatePickerDialog(requireContext(), (dp, y, m, d) -> {
-            cal.set(y, m, d);
-            String picked = dateFormat.format(cal.getTime());
+            // DatePicker ayları 0-tabanlı, LocalDate 1-tabanlı
+            String picked = LocalDate.of(y, m + 1, d).format(DATE_FORMAT);
             target.setText(picked);
 
             // Günlük veya saatlik izin seçiliyse: bitiş tarihi otomatik
@@ -160,9 +161,7 @@ public class LeaveFormFragment extends Fragment {
     private void showTimePicker(EditText target) {
         Calendar cal = Calendar.getInstance();
         new TimePickerDialog(requireContext(), (tp, h, m) -> {
-            cal.set(Calendar.HOUR_OF_DAY, h);
-            cal.set(Calendar.MINUTE, m);
-            target.setText(timeFormat.format(cal.getTime()));
+            target.setText(LocalTime.of(h, m).format(TIME_FORMAT));
         }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show();
     }
 

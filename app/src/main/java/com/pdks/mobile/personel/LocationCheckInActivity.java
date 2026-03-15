@@ -32,8 +32,8 @@ import com.pdks.mobile.util.LocationUtils;
 import com.pdks.mobile.util.SessionManager;
 import com.pdks.mobile.util.ViewUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class LocationCheckInActivity extends AppCompatActivity {
@@ -79,11 +79,11 @@ public class LocationCheckInActivity extends AppCompatActivity {
     }
 
     private void startClock() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        DateTimeFormatter clockFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
         Runnable tick = new Runnable() {
             @Override
             public void run() {
-                tvCurrentTime.setText(sdf.format(new Date()));
+                tvCurrentTime.setText(LocalTime.now().format(clockFormat));
                 timeHandler.postDelayed(this, 1000);
             }
         };
@@ -98,9 +98,10 @@ public class LocationCheckInActivity extends AppCompatActivity {
             return;
         }
 
+        // B6: Interval artırıldı (3s→5s), yeterli doğrulukta güncelleme durur
         LocationRequest locRequest = new LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, 3000)
-                .setMinUpdateIntervalMillis(1000)
+                Priority.PRIORITY_HIGH_ACCURACY, 5000)
+                .setMinUpdateIntervalMillis(2000)
                 .build();
 
         locationCallback = new LocationCallback() {
@@ -125,6 +126,11 @@ public class LocationCheckInActivity extends AppCompatActivity {
                     tvLocationInfo.setText(String.format(Locale.US,
                             "%.6f, %.6f (±%.0fm)", currentLat, currentLng, loc.getAccuracy()));
                     btnCheckInOut.setEnabled(true);
+
+                    // B6: ±50m veya daha iyi doğruluk → güncellemeyi durdur (batarya tasarrufu)
+                    if (loc.getAccuracy() <= 50f) {
+                        fusedClient.removeLocationUpdates(locationCallback);
+                    }
                 }
             }
         };

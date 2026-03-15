@@ -21,9 +21,9 @@ import androidx.annotation.NonNull;
 
 import com.pdks.mobile.api.BaseApiCallback;
 
-import java.text.SimpleDateFormat;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,15 +65,15 @@ public class MonthlyOvertimeActivity extends AppCompatActivity {
 
     private void setupMonthSpinner() {
         List<String> monthLabels = new ArrayList<>();
-        SimpleDateFormat labelFormat = new SimpleDateFormat("MMMM yyyy", new Locale("tr"));
-        SimpleDateFormat valueFormat = new SimpleDateFormat("yyyy-MM", Locale.US);
+        DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("tr"));
+        DateTimeFormatter valueFormat = DateTimeFormatter.ofPattern("yyyy-MM");
 
-        Calendar cal = Calendar.getInstance();
+        YearMonth current = YearMonth.now();
         // Son 6 ay
         for (int i = 0; i < 6; i++) {
-            monthLabels.add(labelFormat.format(cal.getTime()));
-            monthValues.add(valueFormat.format(cal.getTime()));
-            cal.add(Calendar.MONTH, -1);
+            YearMonth ym = current.minusMonths(i);
+            monthLabels.add(ym.format(labelFormat));
+            monthValues.add(ym.format(valueFormat));
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(

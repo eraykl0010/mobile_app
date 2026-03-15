@@ -394,9 +394,10 @@ public class QrCheckInActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) return;
 
+        // B6: Interval artırıldı (3s→5s), yeterli doğrulukta güncelleme durur
         LocationRequest locReq = new LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, 3000)
-                .setMinUpdateIntervalMillis(1000)
+                Priority.PRIORITY_HIGH_ACCURACY, 5000)
+                .setMinUpdateIntervalMillis(2000)
                 .build();
 
         locationCallback = new LocationCallback() {
@@ -419,6 +420,11 @@ public class QrCheckInActivity extends AppCompatActivity {
                     String info = String.format(Locale.US, "Konum hazır (±%.0fm)", loc.getAccuracy());
                     tvScanLocationInfo.setText(info);
                     tvGenerateLocationInfo.setText(info);
+
+                    // B6: ±50m veya daha iyi doğruluk → güncellemeyi durdur (batarya tasarrufu)
+                    if (loc.getAccuracy() <= 50f) {
+                        fusedClient.removeLocationUpdates(locationCallback);
+                    }
                 }
             }
         };
