@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.tabs.TabLayout;
 import com.pdks.mobile.R;
@@ -25,6 +26,7 @@ public class AttendanceReportActivity extends AppCompatActivity {
 
     private RecyclerView rvAttendance;
     private ProgressBar progressBar;
+    private SwipeRefreshLayout swipeRefresh;
     private TabLayout tabLayout;
     private AttendanceAdapter adapter;
     private ApiService apiService;
@@ -42,6 +44,7 @@ public class AttendanceReportActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         rvAttendance = findViewById(R.id.rvAttendance);
         progressBar = findViewById(R.id.progressReport);
+        swipeRefresh = findViewById(R.id.swipeRefreshAttendance);
 
         apiService = RetrofitClient.getClient(this).create(ApiService.class);
         personnelId = new SessionManager(this).getPersonnelId();
@@ -49,6 +52,16 @@ public class AttendanceReportActivity extends AppCompatActivity {
         adapter = new AttendanceAdapter();
         rvAttendance.setLayoutManager(new LinearLayoutManager(this));
         rvAttendance.setAdapter(adapter);
+
+        // B5: Pull-to-refresh
+        swipeRefresh.setColorSchemeResources(R.color.primary);
+        swipeRefresh.setOnRefreshListener(() -> {
+            if (tabLayout.getSelectedTabPosition() == 0) {
+                loadDailyReport();
+            } else {
+                loadWeeklyReport();
+            }
+        });
 
         tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_daily)));
         tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_weekly)));
@@ -94,6 +107,7 @@ public class AttendanceReportActivity extends AppCompatActivity {
             @Override
             public void onFinally() {
                 progressBar.setVisibility(View.GONE);
+                swipeRefresh.setRefreshing(false);
             }
         };
     }

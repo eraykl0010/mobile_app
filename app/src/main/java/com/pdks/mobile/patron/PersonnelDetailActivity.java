@@ -66,6 +66,13 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         // ── Personele uzun basınca seçenek menüsü ──
         adapter.setOnItemLongClickListener((item, position) -> showPersonnelOptionsDialog(item));
 
+        // B5: Pull-to-refresh
+        binding.swipeRefreshPersonnel.setColorSchemeResources(R.color.primary);
+        binding.swipeRefreshPersonnel.setOnRefreshListener(() -> {
+            loadPersonnelList();
+            loadSummary(null);
+        });
+
         setupBoxClickListeners();
         setupClearFilter();
         loadDepartments();
@@ -285,6 +292,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
             @Override
             public void onFinally() {
                 binding.progressDetail.setVisibility(View.GONE);
+                binding.swipeRefreshPersonnel.setRefreshing(false);
             }
         });
     }

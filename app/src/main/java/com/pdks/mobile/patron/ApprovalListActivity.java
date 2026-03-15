@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.tabs.TabLayout;
 import com.pdks.mobile.R;
@@ -37,6 +38,7 @@ public class ApprovalListActivity extends AppCompatActivity {
     private View progressBar;
     private TextView tvEmpty;
     private TabLayout tabStatus;
+    private SwipeRefreshLayout swipeRefresh;
     private ApiService apiService;
 
     private String type;           // "yillik", "saatlik", "avans"
@@ -65,8 +67,13 @@ public class ApprovalListActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressApproval);
         tvEmpty = findViewById(R.id.tvEmptyApproval);
         tabStatus = findViewById(R.id.tabApprovalStatus);
+        swipeRefresh = findViewById(R.id.swipeRefreshApproval);
 
         rvApprovals.setLayoutManager(new LinearLayoutManager(this));
+
+        // B5: Pull-to-refresh
+        swipeRefresh.setColorSchemeResources(R.color.primary);
+        swipeRefresh.setOnRefreshListener(this::loadData);
 
         // 3 Tab
         tabStatus.addTab(tabStatus.newTab().setText(getString(R.string.tab_pending)));
@@ -124,6 +131,7 @@ public class ApprovalListActivity extends AppCompatActivity {
                     @Override
                     public void onFinally() {
                         progressBar.setVisibility(View.GONE);
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
     }
@@ -172,6 +180,7 @@ public class ApprovalListActivity extends AppCompatActivity {
                     @Override
                     public void onFinally() {
                         progressBar.setVisibility(View.GONE);
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
     }

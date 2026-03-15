@@ -4,8 +4,10 @@
     <!-- ══════════ Ortak ══════════ -->
     <string name="welcome_message">Hoş geldiniz, %s</string>
     <string name="error_connection">Bağlantı hatası: %s</string>
+    <string name="error_no_internet">İnternet bağlantısı yok</string>
     <string name="error_server">Sunucu hatası (HTTP %d)</string>
     <string name="error_submit_failed">Talep gönderilemedi</string>
+    <string name="error_session_expired">Oturumunuz sona erdi, lütfen tekrar giriş yapın</string>
     <string name="checkin_success">Giriş / Çıkış Kaydı Gönderildi.</string>
     <string name="request_prefix">Talep: %s</string>
     <string name="work_info">Çalışma: %s</string>
@@ -47,6 +49,7 @@
     <string name="location_waiting">Konum bekleniyor…</string>
     <string name="location_failed_retry">Konum alınamadı, tekrar deneyin</string>
     <string name="location_fetching_card">Konum alınıyor… | Kart: %s</string>
+    <string name="location_mock_detected">Sahte konum tespit edildi!</string>
 
     <!-- ══════════ QR ══════════ -->
     <string name="tab_qr_scan">QR Okut</string>

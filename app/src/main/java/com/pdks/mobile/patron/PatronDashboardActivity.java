@@ -56,6 +56,14 @@ public class PatronDashboardActivity extends AppCompatActivity {
         loadDashboardSummary(null);
         loadOvertimeSummary();
         loadApprovalCounts();
+
+        // B5: Pull-to-refresh
+        binding.swipeRefreshDashboard.setColorSchemeResources(R.color.primary);
+        binding.swipeRefreshDashboard.setOnRefreshListener(() -> {
+            loadDashboardSummary(selectedDepartmentId);
+            loadOvertimeSummary();
+            loadApprovalCounts();
+        });
     }
 
     private void setupUI() {
@@ -149,6 +157,11 @@ public class PatronDashboardActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(@NonNull DashboardSummary data) {
                         updateSummaryUI(data);
+                    }
+
+                    @Override
+                    public void onFinally() {
+                        binding.swipeRefreshDashboard.setRefreshing(false);
                     }
                 });
     }

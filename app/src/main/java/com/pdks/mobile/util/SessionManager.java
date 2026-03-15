@@ -9,10 +9,6 @@ import android.util.Log;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
-import java.net.NetworkInterface;
-import java.util.Collections;
-import java.util.List;
-
 public class SessionManager {
 
     private static final String TAG = "SessionManager";
@@ -87,47 +83,22 @@ public class SessionManager {
         }
     }
 
-    // ══════════════ MAC ADRESİ ══════════════
+    // ══════════════ CİHAZ TANIMLAYICI ══════════════
 
+    /**
+     * Cihaz tanımlayıcı döndürür.
+     * Android 10+ sürümlerde gerçek MAC adresi alınamaz (02:00:00:00:00:00 döner).
+     * Bu yüzden doğrudan Android ID tabanlı tanımlayıcı kullanılır.
+     */
     public String getMacAddress() {
-        String savedMac = prefs.getString(KEY_MAC_ADDRESS, null);
-        if (savedMac != null && !savedMac.isEmpty() && !"02:00:00:00:00:00".equals(savedMac)) {
-            return savedMac;
+        String saved = prefs.getString(KEY_MAC_ADDRESS, null);
+        if (saved != null && !saved.isEmpty()) {
+            return saved;
         }
 
-        String mac = getMacFromNetworkInterface();
-        if (mac != null && !mac.isEmpty() && !"02:00:00:00:00:00".equals(mac)) {
-            prefs.edit().putString(KEY_MAC_ADDRESS, mac).apply();
-            return mac;
-        }
-
-        String fallback = "AID_" + getDeviceId();
-        prefs.edit().putString(KEY_MAC_ADDRESS, fallback).apply();
-        return fallback;
-    }
-
-    private String getMacFromNetworkInterface() {
-        try {
-            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface intf : interfaces) {
-                if (!intf.getName().equalsIgnoreCase("wlan0")) continue;
-
-                byte[] macBytes = intf.getHardwareAddress();
-                if (macBytes == null) return null;
-
-                StringBuilder sb = new StringBuilder();
-                for (byte b : macBytes) {
-                    sb.append(String.format("%02X:", b));
-                }
-                if (sb.length() > 0) {
-                    sb.deleteCharAt(sb.length() - 1);
-                }
-                return sb.toString();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "MAC adresi alınamadı", e);
-        }
-        return null;
+        String identifier = "AID_" + getDeviceId();
+        prefs.edit().putString(KEY_MAC_ADDRESS, identifier).apply();
+        return identifier;
     }
 
     // ══════════════ PATRON OTURUM YÖNETİMİ ══════════════

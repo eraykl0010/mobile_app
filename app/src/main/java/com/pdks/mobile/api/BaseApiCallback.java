@@ -100,7 +100,11 @@ public abstract class BaseApiCallback<T> implements Callback<T> {
     public void onNetworkError(@NonNull Throwable t) {
         Log.e(TAG, "Ağ hatası: " + t.getClass().getSimpleName() + " → " + t.getMessage());
         if (context != null) {
-            showToast(context.getString(R.string.error_connection, t.getMessage()));
+            if (t instanceof NoConnectivityException) {
+                showToast(context.getString(R.string.error_no_internet));
+            } else {
+                showToast(context.getString(R.string.error_connection, t.getMessage()));
+            }
         }
     }
 

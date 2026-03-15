@@ -28,6 +28,7 @@ import com.pdks.mobile.api.RetrofitClient;
 import com.pdks.mobile.constants.CheckInType;
 import com.pdks.mobile.model.CheckInOutRequest;
 import com.pdks.mobile.model.CheckInOutResponse;
+import com.pdks.mobile.util.LocationUtils;
 import com.pdks.mobile.util.SessionManager;
 import com.pdks.mobile.util.ViewUtils;
 
@@ -107,6 +108,15 @@ public class LocationCheckInActivity extends AppCompatActivity {
             public void onLocationResult(@NonNull LocationResult result) {
                 Location loc = result.getLastLocation();
                 if (loc != null) {
+                    // B3: Sahte konum kontrolü
+                    if (LocationUtils.isMockLocation(loc)) {
+                        tvStatus.setText(getString(R.string.location_mock_detected));
+                        tvStatus.setTextColor(getColor(R.color.status_danger));
+                        btnCheckInOut.setEnabled(false);
+                        locationReady = false;
+                        return;
+                    }
+
                     currentLat = loc.getLatitude();
                     currentLng = loc.getLongitude();
                     locationReady = true;

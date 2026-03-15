@@ -2,6 +2,7 @@ package com.pdks.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -37,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // B2: 401 interceptor tarafından yönlendirilmişse bilgi ver
+        if (getIntent().getBooleanExtra("session_expired", false)) {
+            Toast.makeText(this, getString(R.string.error_session_expired),
+                    Toast.LENGTH_LONG).show();
+        }
 
         setupClickListeners();
     }

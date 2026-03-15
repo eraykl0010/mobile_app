@@ -47,11 +47,18 @@
             android:textSize="@dimen/text_body"
             android:visibility="gone" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvApprovals"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshApproval"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="@dimen/spacing_sm"
-            android:clipToPadding="false" />
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvApprovals"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/spacing_sm"
+                android:clipToPadding="false" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </FrameLayout>
 </LinearLayout>
