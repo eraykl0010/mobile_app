@@ -76,8 +76,16 @@ dependencies {
     // ViewPager2
     implementation("androidx.viewpager2:viewpager2:1.1.0")
 
-    // Testing
+    // Testing — Unit
     testImplementation(libs.junit)
+    testImplementation("com.google.truth:truth:1.4.4")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.squareup.retrofit2:retrofit:2.11.0")
+    testImplementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    testImplementation("com.google.code.gson:gson:2.11.0")
+
+    // Testing — Instrumented (Android cihaz gerektirenler)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
