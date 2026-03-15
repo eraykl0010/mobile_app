@@ -22,7 +22,7 @@ public class AdvanceRequestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_advance_request);
 
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((TextView) findViewById(R.id.tvToolbarTitle)).setText("Avans Talebi");
+        ((TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_advance_request));
 
         TabLayout tabLayout = findViewById(R.id.tabAdvance);
         ViewPager2 viewPager = findViewById(R.id.vpAdvance);
@@ -40,7 +40,7 @@ public class AdvanceRequestActivity extends AppCompatActivity {
         });
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, pos) -> {
-            tab.setText(pos == 0 ? "Yeni Talep" : "Geçmiş Talepler");
+            tab.setText(pos == 0 ? getString(R.string.tab_new_request) : getString(R.string.tab_history));
         }).attach();
     }
 }

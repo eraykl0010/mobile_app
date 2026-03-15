@@ -7,6 +7,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.pdks.mobile.R;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,7 +88,9 @@ public abstract class BaseApiCallback<T> implements Callback<T> {
      */
     public void onApiError(int httpCode, @Nullable String errorBody) {
         Log.e(TAG, "HTTP " + httpCode + (errorBody != null ? " → " + errorBody : ""));
-        showToast("Sunucu hatası (HTTP " + httpCode + ")");
+        if (context != null) {
+            showToast(context.getString(R.string.error_server, httpCode));
+        }
     }
 
     /**
@@ -95,7 +99,9 @@ public abstract class BaseApiCallback<T> implements Callback<T> {
      */
     public void onNetworkError(@NonNull Throwable t) {
         Log.e(TAG, "Ağ hatası: " + t.getClass().getSimpleName() + " → " + t.getMessage());
-        showToast("Bağlantı hatası: " + t.getMessage());
+        if (context != null) {
+            showToast(context.getString(R.string.error_connection, t.getMessage()));
+        }
     }
 
     /**

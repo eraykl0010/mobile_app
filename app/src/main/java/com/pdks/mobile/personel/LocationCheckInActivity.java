@@ -25,6 +25,7 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
+import com.pdks.mobile.constants.CheckInType;
 import com.pdks.mobile.model.CheckInOutRequest;
 import com.pdks.mobile.model.CheckInOutResponse;
 import com.pdks.mobile.util.SessionManager;
@@ -56,7 +57,7 @@ public class LocationCheckInActivity extends AppCompatActivity {
 
         // Toolbar
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((TextView) findViewById(R.id.tvToolbarTitle)).setText("Konum ile Giriş/Çıkış");
+        ((TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_location_checkin));
 
         tvStatus = findViewById(R.id.tvCheckStatus);
         tvLocationInfo = findViewById(R.id.tvLocationInfo);
@@ -110,7 +111,7 @@ public class LocationCheckInActivity extends AppCompatActivity {
                     currentLng = loc.getLongitude();
                     locationReady = true;
 
-                    tvStatus.setText("Konum hazır");
+                    tvStatus.setText(getString(R.string.location_ready));
                     tvLocationInfo.setText(String.format(Locale.US,
                             "%.6f, %.6f (±%.0fm)", currentLat, currentLng, loc.getAccuracy()));
                     btnCheckInOut.setEnabled(true);
@@ -123,7 +124,7 @@ public class LocationCheckInActivity extends AppCompatActivity {
 
     private void performCheckInOut() {
         if (!locationReady) {
-            Toast.makeText(this, "Konum henüz alınamadı", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.location_not_ready), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -134,7 +135,7 @@ public class LocationCheckInActivity extends AppCompatActivity {
         CheckInOutRequest request = new CheckInOutRequest(
                 sessionManager.getPersonnelId(),
                 currentLat, currentLng,
-                null, "location",
+                null, CheckInType.LOCATION,
                 sessionManager.getDeviceId()
         );
 
@@ -144,7 +145,7 @@ public class LocationCheckInActivity extends AppCompatActivity {
                     public void onSuccess(@NonNull CheckInOutResponse data) {
                         if (data.isSuccess()) {
                             tvResult.setVisibility(View.VISIBLE);
-                            tvResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
+                            tvResult.setText(getString(R.string.checkin_success));
                             tvResult.setTextColor(getColor(R.color.status_success));
                             // Başarılı işlem sonrası buton 3 sn kilitli kalsın — mükerrer kayıt önlenir
                             btnCheckInOut.postDelayed(() -> btnCheckInOut.setEnabled(true), 3000);
@@ -182,7 +183,7 @@ public class LocationCheckInActivity extends AppCompatActivity {
                 && results[0] == PackageManager.PERMISSION_GRANTED) {
             requestLocationUpdates();
         } else {
-            Toast.makeText(this, "Konum izni gerekli", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.location_permission_required), Toast.LENGTH_LONG).show();
         }
     }
 

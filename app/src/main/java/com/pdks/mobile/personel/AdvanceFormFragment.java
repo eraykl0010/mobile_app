@@ -49,7 +49,7 @@ public class AdvanceFormFragment extends Fragment {
     private void submitAdvance() {
         String amountStr = etAmount.getText().toString().trim();
         if (amountStr.isEmpty()) {
-            Toast.makeText(requireContext(), "Tutar girin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -57,12 +57,12 @@ public class AdvanceFormFragment extends Fragment {
         try {
             amount = Double.parseDouble(amountStr);
         } catch (NumberFormatException e) {
-            Toast.makeText(requireContext(), "Geçerli bir tutar girin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (amount <= 0) {
-            Toast.makeText(requireContext(), "Tutar sıfırdan büyük olmalı", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_amount_positive), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -90,12 +90,12 @@ public class AdvanceFormFragment extends Fragment {
                     public void onSuccess(@NonNull ApiResponse data) {
                         if (data.isSuccess()) {
                             Toast.makeText(requireContext(),
-                                    "Avans talebi gönderildi", Toast.LENGTH_SHORT).show();
+                                    getString(R.string.advance_request_sent), Toast.LENGTH_SHORT).show();
                             etAmount.setText("");
                             etReason.setText("");
                         } else {
                             String msg = data.getMessage() != null
-                                    ? data.getMessage() : "Talep gönderilemedi";
+                                    ? data.getMessage() : getString(R.string.error_submit_failed);
                             Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
                         }
                     }

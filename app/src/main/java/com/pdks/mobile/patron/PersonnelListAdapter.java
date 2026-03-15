@@ -8,11 +8,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
+import com.pdks.mobile.constants.PersonnelStatus;
 import com.pdks.mobile.model.PersonnelInfo;
 
 import java.util.ArrayList;
@@ -114,19 +116,21 @@ public class PersonnelListAdapter extends ListAdapter<PersonnelInfo, PersonnelLi
 
         h.tvName.setText(item.getName());
         h.tvDept.setText(item.getDepartment());
-        h.tvCheckIn.setText("G: " + (item.getCheckIn() != null ? item.getCheckIn() : "--:--"));
-        h.tvCheckOut.setText("Ç: " + (item.getCheckOut() != null ? item.getCheckOut() : "--:--"));
+        String checkIn = item.getCheckIn() != null ? item.getCheckIn() : h.itemView.getContext().getString(R.string.label_no_time);
+        String checkOut = item.getCheckOut() != null ? item.getCheckOut() : h.itemView.getContext().getString(R.string.label_no_time);
+        h.tvCheckIn.setText(h.itemView.getContext().getString(R.string.label_checkin, checkIn));
+        h.tvCheckOut.setText(h.itemView.getContext().getString(R.string.label_checkout, checkOut));
         h.tvStatus.setText(item.getStatusDisplay());
 
         int color;
         switch (item.getStatus() != null ? item.getStatus() : "") {
-            case "active":    color = Color.parseColor("#4CAF50"); break;
-            case "late":      color = Color.parseColor("#FFC107"); break;
-            case "early":     color = Color.parseColor("#FF7043"); break;
-            case "on_leave":  color = Color.parseColor("#2196F3"); break;
-            case "absent":    color = Color.parseColor("#F44336"); break;
-            case "no_record": color = Color.parseColor("#9E9E9E"); break;
-            default:          color = Color.parseColor("#9E9E9E"); break;
+            case PersonnelStatus.ACTIVE:    color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_success); break;
+            case PersonnelStatus.LATE:      color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_warning); break;
+            case PersonnelStatus.EARLY:     color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_early); break;
+            case PersonnelStatus.ON_LEAVE:  color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_info); break;
+            case PersonnelStatus.ABSENT:    color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_danger); break;
+            case PersonnelStatus.NO_RECORD: color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_neutral); break;
+            default:                        color = ContextCompat.getColor(h.itemView.getContext(), R.color.status_neutral); break;
         }
 
         h.viewIndicator.setBackgroundColor(color);

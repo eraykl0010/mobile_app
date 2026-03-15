@@ -62,7 +62,7 @@ public class AdvanceApprovalAdapter extends RecyclerView.Adapter<AdvanceApproval
         holder.tvName.setText(item.getPersonnelName());
         holder.tvDepartment.setText(item.getDepartment());
         holder.tvAmount.setText(currencyFormat.format(item.getAmount()));
-        holder.tvDate.setText("Talep: " + item.getRequestDate());
+        holder.tvDate.setText(holder.itemView.getContext().getString(R.string.request_prefix, item.getRequestDate()));
 
         if (item.getReason() != null && !item.getReason().isEmpty()) {
             holder.tvReason.setVisibility(View.VISIBLE);

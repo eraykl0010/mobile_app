@@ -1,6 +1,7 @@
 package com.pdks.mobile.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.pdks.mobile.constants.AttendanceStatus;
 
 public class AttendanceRecord {
 
@@ -36,11 +37,11 @@ public class AttendanceRecord {
 
     public String getStatusDisplay() {
         switch (status) {
-            case "normal": return "Normal";
-            case "late": return "Geç";
-            case "early": return "Erken Çıkış";
-            case "absent": return "Devamsız";
-            case "leave": return "İzinli";
+            case AttendanceStatus.NORMAL: return "Normal";
+            case AttendanceStatus.LATE:   return "Geç";
+            case AttendanceStatus.EARLY:  return "Erken Çıkış";
+            case AttendanceStatus.ABSENT: return "Devamsız";
+            case AttendanceStatus.LEAVE:  return "İzinli";
             default: return status;
         }
     }

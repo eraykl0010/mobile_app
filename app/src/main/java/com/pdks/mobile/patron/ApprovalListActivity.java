@@ -16,6 +16,10 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
+import com.pdks.mobile.constants.ApprovalAction;
+import com.pdks.mobile.constants.LeaveType;
+import com.pdks.mobile.constants.RequestStatus;
+import com.pdks.mobile.constants.RequestType;
 import com.pdks.mobile.model.AdvanceRequest;
 import com.pdks.mobile.model.ApiResponse;
 import com.pdks.mobile.model.ApprovalRequest;
@@ -51,10 +55,10 @@ public class ApprovalListActivity extends AppCompatActivity {
         TextView tvTitle = findViewById(R.id.tvToolbarTitle);
 
         switch (type) {
-            case "yillik":  tvTitle.setText("Yıllık İzin Talepleri"); break;
-            case "gunluk":  tvTitle.setText("Günlük İzin Talepleri"); break;
-            case "saatlik": tvTitle.setText("Saatlik İzin Talepleri"); break;
-            case "avans":   tvTitle.setText("Avans Talepleri"); break;
+            case LeaveType.ANNUAL:  tvTitle.setText(getString(R.string.title_annual_leave)); break;
+            case LeaveType.DAILY:   tvTitle.setText(getString(R.string.title_daily_leave)); break;
+            case LeaveType.HOURLY:  tvTitle.setText(getString(R.string.title_hourly_leave)); break;
+            case LeaveType.ADVANCE: tvTitle.setText(getString(R.string.title_advance_approval)); break;
         }
 
         rvApprovals = findViewById(R.id.rvApprovals);
@@ -65,17 +69,17 @@ public class ApprovalListActivity extends AppCompatActivity {
         rvApprovals.setLayoutManager(new LinearLayoutManager(this));
 
         // 3 Tab
-        tabStatus.addTab(tabStatus.newTab().setText("Bekleyen"));
-        tabStatus.addTab(tabStatus.newTab().setText("Onaylanan"));
-        tabStatus.addTab(tabStatus.newTab().setText("Reddedilen"));
+        tabStatus.addTab(tabStatus.newTab().setText(getString(R.string.tab_pending)));
+        tabStatus.addTab(tabStatus.newTab().setText(getString(R.string.tab_approved)));
+        tabStatus.addTab(tabStatus.newTab().setText(getString(R.string.tab_rejected)));
 
         tabStatus.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
-                    case 0: currentStatus = "pending"; break;
-                    case 1: currentStatus = "approved"; break;
-                    case 2: currentStatus = "rejected"; break;
+                    case 0: currentStatus = RequestStatus.PENDING; break;
+                    case 1: currentStatus = RequestStatus.APPROVED; break;
+                    case 2: currentStatus = RequestStatus.REJECTED; break;
                 }
                 loadData();
             }
@@ -83,13 +87,13 @@ public class ApprovalListActivity extends AppCompatActivity {
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        currentStatus = "pending";
+        currentStatus = RequestStatus.PENDING;
         loadData();
         ViewUtils.applyStatusBarPadding(this);
     }
 
     private void loadData() {
-        if ("avans".equals(type)) {
+        if (LeaveType.ADVANCE.equals(type)) {
             loadAdvanceRequests();
         } else {
             loadLeaveRequests();
@@ -125,19 +129,19 @@ public class ApprovalListActivity extends AppCompatActivity {
     }
 
     private void setupLeaveAdapter(List<LeaveRequest> list) {
-        boolean showButtons = "pending".equals(currentStatus);
+        boolean showButtons = RequestStatus.PENDING.equals(currentStatus);
 
         LeaveApprovalAdapter adapter = new LeaveApprovalAdapter(
                 new LeaveApprovalAdapter.OnActionListener() {
                     @Override
                     public void onApprove(LeaveRequest item, int position) {
-                        showConfirmDialog("Onay", "Bu izin talebini onaylamak istiyor musunuz?",
-                                () -> sendApproval(String.valueOf(item.getId()), "leave", "approve", position));
+                        showConfirmDialog(getString(R.string.confirm_approve_title), getString(R.string.confirm_approve_leave),
+                                () -> sendApproval(String.valueOf(item.getId()), RequestType.LEAVE, ApprovalAction.APPROVE, position));
                     }
                     @Override
                     public void onReject(LeaveRequest item, int position) {
-                        showConfirmDialog("Red", "Bu izin talebini reddetmek istiyor musunuz?",
-                                () -> sendApproval(String.valueOf(item.getId()), "leave", "reject", position));
+                        showConfirmDialog(getString(R.string.confirm_reject_title), getString(R.string.confirm_reject_leave),
+                                () -> sendApproval(String.valueOf(item.getId()), RequestType.LEAVE, ApprovalAction.REJECT, position));
                     }
                 }, showButtons);
         adapter.setItems(list);
@@ -173,19 +177,19 @@ public class ApprovalListActivity extends AppCompatActivity {
     }
 
     private void setupAdvanceAdapter(List<AdvanceRequest> list) {
-        boolean showButtons = "pending".equals(currentStatus);
+        boolean showButtons = RequestStatus.PENDING.equals(currentStatus);
 
         AdvanceApprovalAdapter adapter = new AdvanceApprovalAdapter(
                 new AdvanceApprovalAdapter.OnActionListener() {
                     @Override
                     public void onApprove(AdvanceRequest item, int position) {
-                        showConfirmDialog("Onay", "Bu avans talebini onaylamak istiyor musunuz?",
-                                () -> sendApproval(item.getId(), "advance", "approve", position));
+                        showConfirmDialog(getString(R.string.confirm_approve_title), getString(R.string.confirm_approve_advance),
+                                () -> sendApproval(item.getId(), RequestType.ADVANCE, ApprovalAction.APPROVE, position));
                     }
                     @Override
                     public void onReject(AdvanceRequest item, int position) {
-                        showConfirmDialog("Red", "Bu avans talebini reddetmek istiyor musunuz?",
-                                () -> sendApproval(item.getId(), "advance", "reject", position));
+                        showConfirmDialog(getString(R.string.confirm_reject_title), getString(R.string.confirm_reject_advance),
+                                () -> sendApproval(item.getId(), RequestType.ADVANCE, ApprovalAction.REJECT, position));
                     }
                 }, showButtons);
         adapter.setItems(list);
@@ -197,7 +201,7 @@ public class ApprovalListActivity extends AppCompatActivity {
     private void sendApproval(String requestId, String reqType, String action, int position) {
         ApprovalRequest req = new ApprovalRequest(requestId, reqType, action, null);
 
-        Call<ApiResponse> call = "approve".equals(action)
+        Call<ApiResponse> call = ApprovalAction.APPROVE.equals(action)
                 ? apiService.approveRequest(req)
                 : apiService.rejectRequest(req);
 
@@ -205,7 +209,8 @@ public class ApprovalListActivity extends AppCompatActivity {
             @Override
             public void onSuccess(@NonNull ApiResponse data) {
                 if (data.isSuccess()) {
-                    String msg = "approve".equals(action) ? "Onaylandı" : "Reddedildi";
+                    String msg = ApprovalAction.APPROVE.equals(action)
+                            ? getString(R.string.status_approved) : getString(R.string.status_rejected);
                     Toast.makeText(ApprovalListActivity.this, msg, Toast.LENGTH_SHORT).show();
 
                     RecyclerView.Adapter<?> adapter = rvApprovals.getAdapter();
@@ -225,9 +230,9 @@ public class ApprovalListActivity extends AppCompatActivity {
 
     private void setEmptyMessage() {
         switch (currentStatus) {
-            case "pending":  tvEmpty.setText("Bekleyen talep bulunmuyor"); break;
-            case "approved": tvEmpty.setText("Onaylanan talep bulunmuyor"); break;
-            case "rejected": tvEmpty.setText("Reddedilen talep bulunmuyor"); break;
+            case RequestStatus.PENDING:  tvEmpty.setText(getString(R.string.empty_pending)); break;
+            case RequestStatus.APPROVED: tvEmpty.setText(getString(R.string.empty_approved)); break;
+            case RequestStatus.REJECTED: tvEmpty.setText(getString(R.string.empty_rejected)); break;
         }
     }
 
@@ -235,8 +240,8 @@ public class ApprovalListActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("Evet", (d, w) -> onConfirm.run())
-                .setNegativeButton("İptal", null)
+                .setPositiveButton(getString(R.string.btn_yes), (d, w) -> onConfirm.run())
+                .setNegativeButton(getString(R.string.btn_cancel), null)
                 .show();
     }
 }

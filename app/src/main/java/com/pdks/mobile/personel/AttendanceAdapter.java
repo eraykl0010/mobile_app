@@ -8,11 +8,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
+import com.pdks.mobile.constants.AttendanceStatus;
 import com.pdks.mobile.model.AttendanceRecord;
 
 import java.util.ArrayList;
@@ -85,11 +87,11 @@ public class AttendanceAdapter extends ListAdapter<AttendanceRecord, AttendanceA
         String status = item.getStatus() != null ? item.getStatus() : "";
         int statusColor;
         switch (status) {
-            case "late": statusColor = Color.parseColor("#FFC107"); break;
-            case "early": statusColor = Color.parseColor("#FF7043"); break;
-            case "absent": statusColor = Color.parseColor("#F44336"); break;
-            case "leave": statusColor = Color.parseColor("#2196F3"); break;
-            default: statusColor = Color.parseColor("#4CAF50"); break;
+            case AttendanceStatus.LATE:   statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_warning); break;
+            case AttendanceStatus.EARLY:  statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_early); break;
+            case AttendanceStatus.ABSENT: statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_danger); break;
+            case AttendanceStatus.LEAVE:  statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_info); break;
+            default:                      statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_success); break;
         }
         holder.tvStatus.setTextColor(statusColor);
         GradientDrawable bg = new GradientDrawable();

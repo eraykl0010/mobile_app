@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.pdks.mobile.R;
 import com.pdks.mobile.databinding.ActivityPersonelDashboardBinding;
 import com.pdks.mobile.util.SessionManager;
 import com.pdks.mobile.util.ViewUtils;
@@ -31,7 +32,7 @@ public class PersonelDashboardActivity extends AppCompatActivity {
 
     private void setupUI() {
         String name = sessionManager.getPersonnelName();
-        binding.tvWelcomePersonel.setText("Hoş geldiniz, " + name);
+        binding.tvWelcomePersonel.setText(getString(R.string.welcome_message, name));
     }
 
     private void setupClickListeners() {

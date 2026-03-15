@@ -42,6 +42,7 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
+import com.pdks.mobile.constants.CheckInType;
 import com.pdks.mobile.model.CheckInOutRequest;
 import com.pdks.mobile.model.CheckInOutResponse;
 import com.pdks.mobile.util.SessionManager;
@@ -91,7 +92,7 @@ public class QrCheckInActivity extends AppCompatActivity {
 
         // Toolbar
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((TextView) findViewById(R.id.tvToolbarTitle)).setText("QR + Konum Giriş/Çıkış");
+        ((TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_qr_checkin));
 
         // Scan views
         layoutScanMode = findViewById(R.id.layoutScanMode);
@@ -124,8 +125,8 @@ public class QrCheckInActivity extends AppCompatActivity {
 
         // Tabs
         TabLayout tabLayout = findViewById(R.id.tabQrMode);
-        tabLayout.addTab(tabLayout.newTab().setText("QR Okut"));
-        tabLayout.addTab(tabLayout.newTab().setText("QR Oluştur"));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_qr_scan)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_qr_generate)));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -192,7 +193,7 @@ public class QrCheckInActivity extends AppCompatActivity {
                 provider.bindToLifecycle(this,
                         CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis);
             } catch (Exception e) {
-                Toast.makeText(this, "Kamera başlatılamadı", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.camera_start_failed), Toast.LENGTH_SHORT).show();
             }
         }, ContextCompat.getMainExecutor(this));
     }
@@ -222,18 +223,18 @@ public class QrCheckInActivity extends AppCompatActivity {
     }
 
     private void onQrScanned(String qrCode) {
-        tvScanStatus.setText("QR okundu — işleniyor...");
+        tvScanStatus.setText(getString(R.string.qr_scanned_processing));
         progressScan.setVisibility(View.VISIBLE);
 
         if (!locationReady) {
-            tvScanStatus.setText("Konum bekleniyor...");
+            tvScanStatus.setText(getString(R.string.location_waiting));
             tvScanStatus.postDelayed(() -> {
                 if (locationReady) {
                     sendScanCheckIn(qrCode);
                 } else {
                     isProcessing = false;
                     progressScan.setVisibility(View.GONE);
-                    tvScanStatus.setText("Konum alınamadı, tekrar deneyin");
+                    tvScanStatus.setText(getString(R.string.location_failed_retry));
                 }
             }, 3000);
             return;
@@ -246,7 +247,7 @@ public class QrCheckInActivity extends AppCompatActivity {
         CheckInOutRequest request = new CheckInOutRequest(
                 sessionManager.getPersonnelId(),
                 currentLat, currentLng,
-                qrCode, "qr_scan",
+                qrCode, CheckInType.QR_SCAN,
                 sessionManager.getDeviceId()
         );
 
@@ -257,9 +258,9 @@ public class QrCheckInActivity extends AppCompatActivity {
                         tvScanResult.setVisibility(View.VISIBLE);
 
                         if (data.isSuccess()) {
-                            tvScanResult.setText("Giriş / Çıkış Kaydı Gönderildi.");
+                            tvScanResult.setText(getString(R.string.checkin_success));
                             tvScanResult.setTextColor(getColor(R.color.status_success));
-                            tvScanStatus.setText("İşlem tamamlandı");
+                            tvScanStatus.setText(getString(R.string.qr_operation_complete));
                         } else {
                             tvScanResult.setText(data.getMessage());
                             tvScanResult.setTextColor(getColor(R.color.status_danger));
@@ -316,12 +317,12 @@ public class QrCheckInActivity extends AppCompatActivity {
                         String.format(Locale.US, "Konum: %.6f, %.6f | Kart: %s",
                                 currentLat, currentLng, cardNo));
             } else {
-                tvGenerateLocationInfo.setText("Konum alınıyor... | Kart: " + cardNo);
+                tvGenerateLocationInfo.setText(getString(R.string.location_fetching_card, cardNo));
             }
 
         } catch (Exception e) {
             progressGenerate.setVisibility(View.GONE);
-            Toast.makeText(this, "QR oluşturulamadı", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.qr_generate_failed), Toast.LENGTH_SHORT).show();
             btnRegenerate.setEnabled(true);
         }
     }
@@ -357,13 +358,13 @@ public class QrCheckInActivity extends AppCompatActivity {
     }
 
     private void startCountdown() {
-        tvQrTimer.setText("Geçerlilik: " + QR_VALIDITY_SECONDS + " sn");
+        tvQrTimer.setText(getString(R.string.qr_timer_validity, QR_VALIDITY_SECONDS));
 
         countDownTimer = new CountDownTimer(QR_VALIDITY_SECONDS * 1000L, 1000) {
             @Override
             public void onTick(long millisLeft) {
                 int seconds = (int) (millisLeft / 1000);
-                tvQrTimer.setText("Geçerlilik: " + seconds + " sn");
+                tvQrTimer.setText(getString(R.string.qr_timer_validity, seconds));
 
                 if (seconds <= 10) {
                     tvQrTimer.setTextColor(getColor(R.color.status_danger));
@@ -374,7 +375,7 @@ public class QrCheckInActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                tvQrTimer.setText("Süre doldu — yeniden oluşturun");
+                tvQrTimer.setText(getString(R.string.qr_timer_expired));
                 tvQrTimer.setTextColor(getColor(R.color.status_danger));
                 ivQrCode.setAlpha(0.3f);
                 btnRegenerate.setEnabled(true);
@@ -424,7 +425,7 @@ public class QrCheckInActivity extends AppCompatActivity {
             startCamera();
             requestLocation();
         } else {
-            Toast.makeText(this, "Kamera ve konum izni gerekli", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.camera_location_permission_required), Toast.LENGTH_LONG).show();
             finish();
         }
     }

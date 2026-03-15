@@ -1,6 +1,7 @@
 package com.pdks.mobile.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.pdks.mobile.constants.LeaveType;
 
 public class LeaveRequest {
 
@@ -56,10 +57,10 @@ public class LeaveRequest {
 
     public String getLeaveTypeDisplay() {
         switch (leaveType) {
-            case "yillik":  return "Yıllık İzin";
-            case "gunluk":  return "Günlük İzin";
-            case "saatlik": return "Saatlik İzin";
-            default:        return leaveType;
+            case LeaveType.ANNUAL:  return "Yıllık İzin";
+            case LeaveType.DAILY:   return "Günlük İzin";
+            case LeaveType.HOURLY:  return "Saatlik İzin";
+            default:                return leaveType;
         }
     }
 

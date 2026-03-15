@@ -43,7 +43,7 @@ public class MonthlyOvertimeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_monthly_overtime);
 
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((TextView) findViewById(R.id.tvToolbarTitle)).setText("Aylık Mesai Bilgisi");
+        ((TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_monthly_overtime));
 
         spinnerMonth = findViewById(R.id.spinnerMonth);
         progressBar = findViewById(R.id.progressOvertime);

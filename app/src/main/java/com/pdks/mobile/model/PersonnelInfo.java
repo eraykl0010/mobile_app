@@ -1,6 +1,7 @@
 package com.pdks.mobile.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.pdks.mobile.constants.PersonnelStatus;
 
 public class PersonnelInfo {
 
@@ -65,11 +66,11 @@ public class PersonnelInfo {
     public String getStatusDisplay() {
         if (status == null) return "-";
         switch (status) {
-            case "active":   return "Aktif";
-            case "on_leave": return "İzinli";
-            case "absent":   return "Devamsız";
-            case "late":     return "Geç";
-            case "early":    return "Erken Çıkış";
+            case PersonnelStatus.ACTIVE:   return "Aktif";
+            case PersonnelStatus.ON_LEAVE: return "İzinli";
+            case PersonnelStatus.ABSENT:   return "Devamsız";
+            case PersonnelStatus.LATE:     return "Geç";
+            case PersonnelStatus.EARLY:    return "Erken Çıkış";
             default:         return status;
         }
     }

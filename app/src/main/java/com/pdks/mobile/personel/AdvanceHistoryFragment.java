@@ -39,7 +39,7 @@ public class AdvanceHistoryFragment extends Fragment {
         rvHistory = view.findViewById(R.id.rvHistory);
         progressBar = view.findViewById(R.id.progressHistory);
         tvEmpty = view.findViewById(R.id.tvEmptyHistory);
-        tvEmpty.setText("Henüz avans talebi bulunmuyor");
+        tvEmpty.setText(getString(R.string.advance_history_empty));
 
         adapter = new AdvanceHistoryAdapter();
         rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));

@@ -8,11 +8,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
+import com.pdks.mobile.constants.LeaveType;
+import com.pdks.mobile.constants.RequestStatus;
 import com.pdks.mobile.model.LeaveRequest;
 
 import java.util.ArrayList;
@@ -59,33 +62,33 @@ public class LeaveHistoryAdapter extends ListAdapter<LeaveRequest, LeaveHistoryA
         holder.tvType.setText(item.getLeaveTypeDisplay());
 
         // ── Tarih / Saat bilgisi ──
-        if ("saatlik".equals(item.getLeaveType())) {
+        if (LeaveType.HOURLY.equals(item.getLeaveType())) {
             String date = safe(item.getStartDate());
             String startTime = safe(item.getStartTime(), "--:--");
             String endTime   = safe(item.getEndTime(), "--:--");
             holder.tvDates.setText(date + "  " + startTime + " - " + endTime);
-        } else if ("gunluk".equals(item.getLeaveType())) {
+        } else if (LeaveType.DAILY.equals(item.getLeaveType())) {
             holder.tvDates.setText(safe(item.getStartDate()));
         } else {
             holder.tvDates.setText(safe(item.getStartDate()) + " — " + safe(item.getEndDate()));
         }
 
-        holder.tvRequestDate.setText("Talep: " + safe(item.getRequestDate()));
+        holder.tvRequestDate.setText(holder.itemView.getContext().getString(R.string.request_prefix, safe(item.getRequestDate())));
 
         String statusText;
         int statusColor;
         switch (item.getStatus() != null ? item.getStatus() : "") {
-            case "approved":
-                statusText = "Onaylandı";
-                statusColor = Color.parseColor("#4CAF50");
+            case RequestStatus.APPROVED:
+                statusText = holder.itemView.getContext().getString(R.string.status_approved);
+                statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_success);
                 break;
-            case "rejected":
-                statusText = "Reddedildi";
-                statusColor = Color.parseColor("#F44336");
+            case RequestStatus.REJECTED:
+                statusText = holder.itemView.getContext().getString(R.string.status_rejected);
+                statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_danger);
                 break;
             default:
-                statusText = "Bekliyor";
-                statusColor = Color.parseColor("#FFC107");
+                statusText = holder.itemView.getContext().getString(R.string.status_pending);
+                statusColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.status_warning);
                 break;
         }
 

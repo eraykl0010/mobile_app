@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
@@ -44,9 +45,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupUI() {
         if (SessionManager.MODULE_PATRON.equals(moduleType)) {
-            binding.tvLoginSubtitle.setText("Patron Modülü");
+            binding.tvLoginSubtitle.setText(getString(R.string.module_patron));
         } else {
-            binding.tvLoginSubtitle.setText("Personel Modülü");
+            binding.tvLoginSubtitle.setText(getString(R.string.module_personel));
         }
     }
 
@@ -60,13 +61,13 @@ public class LoginActivity extends AppCompatActivity {
         String cardNo = binding.etPassword.getText().toString().trim();
 
         if (companyCode.isEmpty()) {
-            binding.etCompanyCode.setError("Şirket kodu gerekli");
+            binding.etCompanyCode.setError(getString(R.string.error_company_code_required));
             binding.etCompanyCode.requestFocus();
             return;
         }
 
         if (cardNo.isEmpty()) {
-            binding.etPassword.setError("Personel kart no gerekli");
+            binding.etPassword.setError(getString(R.string.error_card_no_required));
             binding.etPassword.requestFocus();
             return;
         }
@@ -103,10 +104,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onApiError(int httpCode, @Nullable String errorBody) {
                 if (httpCode == 403) {
-                    showDeviceBindingError(
-                            "Bu cihaz başka bir personele kayıtlıdır veya " +
-                                    "bu hesap başka bir cihaza bağlıdır. " +
-                                    "Lütfen yöneticinize başvurun.");
+                    showDeviceBindingError(getString(R.string.device_restriction_message));
                 } else {
                     super.onApiError(httpCode, errorBody);
                 }
@@ -121,10 +119,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showDeviceBindingError(String message) {
         new AlertDialog.Builder(this)
-                .setTitle("Cihaz Kısıtlaması")
+                .setTitle(getString(R.string.device_restriction_title))
                 .setMessage(message)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton("Tamam", null)
+                .setPositiveButton(getString(R.string.btn_ok), null)
                 .setCancelable(true)
                 .show();
     }

@@ -26,6 +26,8 @@
     <color name="status_warning">#FFC107</color>
     <color name="status_danger">#F44336</color>
     <color name="status_info">#2196F3</color>
+    <color name="status_early">#FF7043</color>
+    <color name="status_neutral">#9E9E9E</color>
 
     <!-- Divider -->
     <color name="divider">#FFE0B2</color>

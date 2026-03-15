@@ -1,6 +1,5 @@
 package com.pdks.mobile.patron;
 
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,12 +11,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
+import com.pdks.mobile.constants.PersonnelStatus;
 import com.pdks.mobile.databinding.ActivityPersonnelDetailBinding;
 import com.pdks.mobile.model.ApiResponse;
 import com.pdks.mobile.model.DashboardSummary;
@@ -53,7 +54,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         ViewUtils.applyStatusBarPadding(this);
 
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((android.widget.TextView) findViewById(R.id.tvToolbarTitle)).setText("Personel Bilgi Kartı");
+        ((android.widget.TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_personnel_detail));
 
         apiService = RetrofitClient.getClient(this).create(ApiService.class);
         sessionManager = new SessionManager(this);
@@ -77,7 +78,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════════
 
     private void showPersonnelOptionsDialog(PersonnelInfo item) {
-        String[] options = {"Cihaz Kaydını Sıfırla"};
+        String[] options = {getString(R.string.device_reset_option)};
 
         new AlertDialog.Builder(this)
                 .setTitle(item.getName())
@@ -86,18 +87,16 @@ public class PersonnelDetailActivity extends AppCompatActivity {
                         confirmResetDevice(item);
                     }
                 })
-                .setNegativeButton("İptal", null)
+                .setNegativeButton(getString(R.string.btn_cancel), null)
                 .show();
     }
 
     private void confirmResetDevice(PersonnelInfo item) {
         new AlertDialog.Builder(this)
-                .setTitle("Cihaz Kaydını Sıfırla")
-                .setMessage(item.getName() + " adlı personelin cihaz kaydı silinecek.\n\n"
-                        + "Personel bir sonraki girişte yeni cihazına otomatik kaydedilecektir.\n\n"
-                        + "Devam etmek istiyor musunuz?")
-                .setPositiveButton("Sıfırla", (d, w) -> executeResetDevice(item))
-                .setNegativeButton("İptal", null)
+                .setTitle(getString(R.string.device_reset_title))
+                .setMessage(getString(R.string.device_reset_message, item.getName()))
+                .setPositiveButton(getString(R.string.device_reset_button), (d, w) -> executeResetDevice(item))
+                .setNegativeButton(getString(R.string.btn_cancel), null)
                 .show();
     }
 
@@ -110,10 +109,10 @@ public class PersonnelDetailActivity extends AppCompatActivity {
             public void onSuccess(@NonNull ApiResponse data) {
                 if (data.isSuccess()) {
                     Toast.makeText(PersonnelDetailActivity.this,
-                            item.getName() + " — cihaz kaydı sıfırlandı",
+                            getString(R.string.device_reset_success, item.getName()),
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    String msg = data.getMessage() != null ? data.getMessage() : "İşlem başarısız";
+                    String msg = data.getMessage() != null ? data.getMessage() : getString(R.string.device_reset_failed);
                     Toast.makeText(PersonnelDetailActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
             }
@@ -125,14 +124,14 @@ public class PersonnelDetailActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════════
 
     private void setupBoxClickListeners() {
-        binding.boxActive.setOnClickListener(v -> applyStatusFilter(v, "active", "Aktif Çalışanlar"));
+        binding.boxActive.setOnClickListener(v -> applyStatusFilter(v, PersonnelStatus.ACTIVE, getString(R.string.filter_active)));
         binding.boxTotal.setOnClickListener(v -> {
             clearFilter();
         });
-        binding.boxLeave.setOnClickListener(v -> applyStatusFilter(v, "on_leave", "İzinli Personel"));
-        binding.boxAbsent.setOnClickListener(v -> applyStatusFilter(v, "absent", "Devamsız Personel"));
-        binding.boxLate.setOnClickListener(v -> applyStatusFilter(v, "late", "Geç Gelen Personel"));
-        binding.boxEarly.setOnClickListener(v -> applyStatusFilter(v, "early", "Erken Çıkan Personel"));
+        binding.boxLeave.setOnClickListener(v -> applyStatusFilter(v, PersonnelStatus.ON_LEAVE, getString(R.string.filter_on_leave)));
+        binding.boxAbsent.setOnClickListener(v -> applyStatusFilter(v, PersonnelStatus.ABSENT, getString(R.string.filter_absent)));
+        binding.boxLate.setOnClickListener(v -> applyStatusFilter(v, PersonnelStatus.LATE, getString(R.string.filter_late)));
+        binding.boxEarly.setOnClickListener(v -> applyStatusFilter(v, PersonnelStatus.EARLY, getString(R.string.filter_early)));
     }
 
     private void applyStatusFilter(View box, String status, String label) {
@@ -148,7 +147,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
 
         adapter.filterByStatus(status);
 
-        binding.tvActiveFilter.setText("Filtre: " + label);
+        binding.tvActiveFilter.setText(getString(R.string.filter_label, label));
         binding.layoutActiveFilter.setVisibility(View.VISIBLE);
 
         binding.tvListTitle.setText(label + " (" + adapter.getItemCount() + ")");
@@ -159,7 +158,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         selectedBox = null;
         adapter.clearStatusFilter();
         binding.layoutActiveFilter.setVisibility(View.GONE);
-        binding.tvListTitle.setText("Personel Listesi");
+        binding.tvListTitle.setText(getString(R.string.personnel_list_title));
     }
 
     private void setupClearFilter() {
@@ -170,8 +169,8 @@ public class PersonnelDetailActivity extends AppCompatActivity {
         if (selected) {
             GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(dpToPx(16));
-            bg.setColor(Color.parseColor("#FFF3E0"));
-            bg.setStroke(dpToPx(2), Color.parseColor("#FF6D00"));
+            bg.setColor(ContextCompat.getColor(PersonnelDetailActivity.this, R.color.primary_very_light));
+            bg.setStroke(dpToPx(2), ContextCompat.getColor(PersonnelDetailActivity.this, R.color.primary));
             box.setBackground(bg);
         } else {
             box.setBackgroundResource(R.drawable.bg_card_rounded);
@@ -213,7 +212,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
 
     private void setupSpinner() {
         List<String> items = new ArrayList<>();
-        items.add("Tüm Departmanlar");
+        items.add(getString(R.string.all_departments));
         for (Department d : departments) items.add(d.getName());
 
         ArrayAdapter<String> a = new ArrayAdapter<>(this,
@@ -227,7 +226,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
                 selectedBox = null;
                 resetBoxHighlights();
                 binding.layoutActiveFilter.setVisibility(View.GONE);
-                binding.tvListTitle.setText("Personel Listesi");
+                binding.tvListTitle.setText(getString(R.string.personnel_list_title));
 
                 if (pos == 0) {
                     adapter.filterByDepartment(null);
@@ -262,7 +261,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
             public void onEmpty() {
                 Log.e(TAG, "loadPersonnelList → 200 ama body null");
                 Toast.makeText(PersonnelDetailActivity.this,
-                        "Personel listesi boş döndü", Toast.LENGTH_LONG).show();
+                        getString(R.string.personnel_list_empty), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -270,7 +269,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
                 Log.e(TAG, "loadPersonnelList → HTTP " + httpCode
                         + (errorBody != null ? " → " + errorBody : ""));
                 Toast.makeText(PersonnelDetailActivity.this,
-                        "Personel listesi yüklenemedi (HTTP " + httpCode + ")",
+                        getString(R.string.personnel_list_error, httpCode),
                         Toast.LENGTH_LONG).show();
             }
 
@@ -279,7 +278,7 @@ public class PersonnelDetailActivity extends AppCompatActivity {
                 Log.e(TAG, "loadPersonnelList → HATA: " + t.getClass().getSimpleName()
                         + " → " + t.getMessage(), t);
                 Toast.makeText(PersonnelDetailActivity.this,
-                        "Personel listesi hatası: " + t.getMessage(),
+                        getString(R.string.personnel_list_network_error, t.getMessage()),
                         Toast.LENGTH_LONG).show();
             }
 

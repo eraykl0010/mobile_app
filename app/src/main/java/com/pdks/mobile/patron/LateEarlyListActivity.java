@@ -12,6 +12,7 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
+import com.pdks.mobile.constants.OvertimeType;
 import com.pdks.mobile.databinding.ActivityLateEarlyListBinding;
 import com.pdks.mobile.model.LateEarlyRecord;
 import com.pdks.mobile.util.ViewUtils;
@@ -25,7 +26,7 @@ public class LateEarlyListActivity extends AppCompatActivity {
     private LateEarlyAdapter adapter;
 
     private List<LateEarlyRecord> allRecords = new ArrayList<>();
-    private String currentFilter = "overtime"; // "overtime" veya "undertime"
+    private String currentFilter = OvertimeType.OVERTIME;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +39,20 @@ public class LateEarlyListActivity extends AppCompatActivity {
 
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
         ((android.widget.TextView) findViewById(R.id.tvToolbarTitle))
-                .setText("Fazla Mesai / Eksik Mesai");
+                .setText(getString(R.string.title_late_early));
 
         adapter = new LateEarlyAdapter();
         binding.rvLateEarly.setLayoutManager(new LinearLayoutManager(this));
         binding.rvLateEarly.setAdapter(adapter);
 
         // 2 Tab
-        binding.tabLateEarly.addTab(binding.tabLateEarly.newTab().setText("Fazla Mesai"));
-        binding.tabLateEarly.addTab(binding.tabLateEarly.newTab().setText("Eksik Mesai"));
+        binding.tabLateEarly.addTab(binding.tabLateEarly.newTab().setText(getString(R.string.tab_overtime)));
+        binding.tabLateEarly.addTab(binding.tabLateEarly.newTab().setText(getString(R.string.tab_undertime)));
 
         binding.tabLateEarly.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                currentFilter = tab.getPosition() == 0 ? "overtime" : "undertime";
+                currentFilter = tab.getPosition() == 0 ? OvertimeType.OVERTIME : OvertimeType.UNDERTIME;
                 filterAndShow();
             }
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
@@ -91,9 +92,9 @@ public class LateEarlyListActivity extends AppCompatActivity {
         if (filtered.isEmpty()) {
             binding.tvEmptyLateEarly.setVisibility(View.VISIBLE);
             binding.tvEmptyLateEarly.setText(
-                    "overtime".equals(currentFilter)
-                            ? "Dün fazla mesai yapan personel yok"
-                            : "Dün eksik mesaisi olan personel yok");
+                    OvertimeType.OVERTIME.equals(currentFilter)
+                            ? getString(R.string.empty_overtime)
+                            : getString(R.string.empty_undertime));
             binding.rvLateEarly.setVisibility(View.GONE);
         } else {
             binding.tvEmptyLateEarly.setVisibility(View.GONE);
@@ -104,13 +105,13 @@ public class LateEarlyListActivity extends AppCompatActivity {
         // Tab sayıları
         int overtimeCount = 0, undertimeCount = 0;
         for (LateEarlyRecord r : allRecords) {
-            if ("overtime".equals(r.getType())) overtimeCount++;
+            if (OvertimeType.OVERTIME.equals(r.getType())) overtimeCount++;
             else undertimeCount++;
         }
 
         TabLayout.Tab tab0 = binding.tabLateEarly.getTabAt(0);
         TabLayout.Tab tab1 = binding.tabLateEarly.getTabAt(1);
-        if (tab0 != null) tab0.setText("Fazla Mesai (" + overtimeCount + ")");
-        if (tab1 != null) tab1.setText("Eksik Mesai (" + undertimeCount + ")");
+        if (tab0 != null) tab0.setText(getString(R.string.tab_overtime_count, overtimeCount));
+        if (tab1 != null) tab1.setText(getString(R.string.tab_undertime_count, undertimeCount));
     }
 }

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
+import com.pdks.mobile.constants.LeaveType;
 import com.pdks.mobile.model.LeaveRequest;
 
 import java.util.ArrayList;
@@ -77,8 +78,8 @@ public class LeaveApprovalAdapter extends ListAdapter<LeaveRequest, LeaveApprova
         holder.tvPersonnelName.setText(item.getPersonnelName());
 
         String leaveType = item.getLeaveType();
-        boolean isSaatlik = "saatlik".equals(leaveType);
-        boolean isGunluk  = "gunluk".equals(leaveType);
+        boolean isSaatlik = LeaveType.HOURLY.equals(leaveType);
+        boolean isGunluk  = LeaveType.DAILY.equals(leaveType);
 
         holder.tvLeaveType.setText(item.getLeaveTypeDisplay());
 
@@ -92,22 +93,23 @@ public class LeaveApprovalAdapter extends ListAdapter<LeaveRequest, LeaveApprova
         }
 
         // ── Etiketler + Değerler (RecyclerView recycling güvenliği) ──
+        android.content.Context ctx = holder.itemView.getContext();
         if (isSaatlik) {
             // Saatlik izin: tarih alanlarında SAAT göster, etiketleri değiştir
-            holder.tvLabelStart.setText("Başlangıç Saati");
-            holder.tvLabelEnd.setText("Bitiş Saati");
+            holder.tvLabelStart.setText(ctx.getString(R.string.label_start_time));
+            holder.tvLabelEnd.setText(ctx.getString(R.string.label_end_time));
             holder.tvStartDate.setText(safe(item.getStartTime(), "-"));
             holder.tvEndDate.setText(safe(item.getEndTime(), "-"));
         } else if (isGunluk) {
             // Günlük izin: tek tarih
-            holder.tvLabelStart.setText("Tarih");
-            holder.tvLabelEnd.setText("Bitiş");
+            holder.tvLabelStart.setText(ctx.getString(R.string.label_date));
+            holder.tvLabelEnd.setText(ctx.getString(R.string.label_end));
             holder.tvStartDate.setText(safe(item.getStartDate()));
             holder.tvEndDate.setText(safe(item.getStartDate()));
         } else {
             // Yıllık izin: başlangıç - bitiş tarihi
-            holder.tvLabelStart.setText("Başlangıç");
-            holder.tvLabelEnd.setText("Bitiş");
+            holder.tvLabelStart.setText(ctx.getString(R.string.label_start));
+            holder.tvLabelEnd.setText(ctx.getString(R.string.label_end));
             holder.tvStartDate.setText(safe(item.getStartDate()));
             holder.tvEndDate.setText(safe(item.getEndDate()));
         }

@@ -23,7 +23,7 @@ public class LeaveRequestActivity extends AppCompatActivity {
 
         // Toolbar
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((TextView) findViewById(R.id.tvToolbarTitle)).setText("İzin Talebi");
+        ((TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_leave_request));
 
         TabLayout tabLayout = findViewById(R.id.tabLeave);
         ViewPager2 viewPager = findViewById(R.id.vpLeave);
@@ -41,7 +41,7 @@ public class LeaveRequestActivity extends AppCompatActivity {
         });
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, pos) -> {
-            tab.setText(pos == 0 ? "Yeni Talep" : "Geçmiş Talepler");
+            tab.setText(pos == 0 ? getString(R.string.tab_new_request) : getString(R.string.tab_history));
         }).attach();
     }
 }

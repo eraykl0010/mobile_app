@@ -22,6 +22,7 @@ import com.pdks.mobile.R;
 import com.pdks.mobile.api.ApiService;
 import com.pdks.mobile.api.BaseApiCallback;
 import com.pdks.mobile.api.RetrofitClient;
+import com.pdks.mobile.constants.LeaveType;
 import com.pdks.mobile.model.ApiResponse;
 import com.pdks.mobile.model.LeaveSubmitRequest;
 import com.pdks.mobile.util.SessionManager;
@@ -48,7 +49,7 @@ public class LeaveFormFragment extends Fragment {
     private static final int TYPE_SAATLIK = 2;
 
     // Spinner index → API değeri
-    private static final String[] TYPE_VALUES = {"yillik", "gunluk", "saatlik"};
+    private static final String[] TYPE_VALUES = LeaveType.VALUES;
 
     @Nullable
     @Override
@@ -76,7 +77,11 @@ public class LeaveFormFragment extends Fragment {
     }
 
     private void setupSpinner() {
-        String[] types = {"Yıllık İzin", "Günlük İzin", "Saatlik İzin"};
+        String[] types = {
+                getString(R.string.leave_type_annual),
+                getString(R.string.leave_type_daily),
+                getString(R.string.leave_type_hourly)
+        };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(), android.R.layout.simple_spinner_item, types);
@@ -164,7 +169,7 @@ public class LeaveFormFragment extends Fragment {
     private void submitRequest() {
         String startDate = etStartDate.getText().toString().trim();
         if (startDate.isEmpty()) {
-            Toast.makeText(requireContext(), "Başlangıç tarihi seçin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_start_date_required), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -181,7 +186,7 @@ public class LeaveFormFragment extends Fragment {
 
         // Yıllık izin: bitiş tarihi zorunlu
         if (typeIndex == TYPE_YILLIK && endDate.isEmpty()) {
-            Toast.makeText(requireContext(), "Bitiş tarihi seçin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_end_date_required), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -189,7 +194,7 @@ public class LeaveFormFragment extends Fragment {
         String startTime = etStartTime.getText().toString().trim();
         String endTime = etEndTime.getText().toString().trim();
         if (isSaatlik && (startTime.isEmpty() || endTime.isEmpty())) {
-            Toast.makeText(requireContext(), "Saat aralığı seçin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_time_range_required), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -222,11 +227,11 @@ public class LeaveFormFragment extends Fragment {
                     public void onSuccess(@NonNull ApiResponse data) {
                         if (data.isSuccess()) {
                             Toast.makeText(requireContext(),
-                                    "İzin talebi gönderildi", Toast.LENGTH_SHORT).show();
+                                    getString(R.string.leave_request_sent), Toast.LENGTH_SHORT).show();
                             clearForm();
                         } else {
                             String msg = data.getMessage() != null
-                                    ? data.getMessage() : "Talep gönderilemedi";
+                                    ? data.getMessage() : getString(R.string.error_submit_failed);
                             Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
                         }
                     }

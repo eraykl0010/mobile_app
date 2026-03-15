@@ -1,6 +1,5 @@
 package com.pdks.mobile.patron;
 
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,9 +7,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
+import com.pdks.mobile.constants.OvertimeType;
 import com.pdks.mobile.model.LateEarlyRecord;
 
 import java.util.ArrayList;
@@ -41,20 +42,23 @@ public class LateEarlyAdapter extends RecyclerView.Adapter<LateEarlyAdapter.View
         holder.tvDepartment.setText(item.getDepartment());
         holder.tvTime.setText(item.getActualTime());
 
-        boolean isOvertime = "overtime".equals(item.getType());
+        boolean isOvertime = OvertimeType.OVERTIME.equals(item.getType());
 
         // Badge
-        holder.tvBadge.setText(isOvertime ? "FAZLA" : "EKSİK");
+        holder.tvBadge.setText(isOvertime
+                ? holder.itemView.getContext().getString(R.string.badge_overtime)
+                : holder.itemView.getContext().getString(R.string.badge_undertime));
         GradientDrawable badgeBg = new GradientDrawable();
         badgeBg.setCornerRadius(8f);
-        badgeBg.setColor(isOvertime ? Color.parseColor("#4CAF50") : Color.parseColor("#FF7043"));
+        int badgeColor = ContextCompat.getColor(holder.itemView.getContext(),
+                isOvertime ? R.color.status_success : R.color.status_early);
+        badgeBg.setColor(badgeColor);
         holder.tvBadge.setBackground(badgeBg);
 
         // Fark
         String diffText = (isOvertime ? "+" : "-") + item.getDifferenceMinutes() + " dk";
         holder.tvDiff.setText(diffText);
-        holder.tvDiff.setTextColor(isOvertime ?
-                Color.parseColor("#4CAF50") : Color.parseColor("#FF7043"));
+        holder.tvDiff.setTextColor(badgeColor);
     }
 
     @Override

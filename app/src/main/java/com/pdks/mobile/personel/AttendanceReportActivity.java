@@ -37,7 +37,7 @@ public class AttendanceReportActivity extends AppCompatActivity {
 
         // Toolbar
         findViewById(R.id.btnToolbarBack).setOnClickListener(v -> finish());
-        ((TextView) findViewById(R.id.tvToolbarTitle)).setText("Giriş-Çıkış Raporu");
+        ((TextView) findViewById(R.id.tvToolbarTitle)).setText(getString(R.string.title_attendance_report));
 
         tabLayout = findViewById(R.id.tabLayout);
         rvAttendance = findViewById(R.id.rvAttendance);
@@ -50,8 +50,8 @@ public class AttendanceReportActivity extends AppCompatActivity {
         rvAttendance.setLayoutManager(new LinearLayoutManager(this));
         rvAttendance.setAdapter(adapter);
 
-        tabLayout.addTab(tabLayout.newTab().setText("Günlük"));
-        tabLayout.addTab(tabLayout.newTab().setText("Haftalık"));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_daily)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_weekly)));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

@@ -1,3 +1,138 @@
 <resources>
-    <string name="app_name">PDKSMobile</string>
+    <string name="app_name">OnlinePDKS</string>
+
+    <!-- ══════════ Ortak ══════════ -->
+    <string name="welcome_message">Hoş geldiniz, %s</string>
+    <string name="error_connection">Bağlantı hatası: %s</string>
+    <string name="error_server">Sunucu hatası (HTTP %d)</string>
+    <string name="error_submit_failed">Talep gönderilemedi</string>
+    <string name="checkin_success">Giriş / Çıkış Kaydı Gönderildi.</string>
+    <string name="request_prefix">Talep: %s</string>
+    <string name="work_info">Çalışma: %s</string>
+    <string name="work_info_overtime">Çalışma: %1$s | Mesai: %2$s</string>
+    <string name="tab_new_request">Yeni Talep</string>
+    <string name="tab_history">Geçmiş Talepler</string>
+
+    <!-- ══════════ Durum Etiketleri ══════════ -->
+    <string name="status_approved">Onaylandı</string>
+    <string name="status_rejected">Reddedildi</string>
+    <string name="status_pending">Bekliyor</string>
+
+    <!-- ══════════ Login ══════════ -->
+    <string name="module_patron">Patron Modülü</string>
+    <string name="module_personel">Personel Modülü</string>
+    <string name="error_company_code_required">Şirket kodu gerekli</string>
+    <string name="error_card_no_required">Personel kart no gerekli</string>
+    <string name="device_restriction_title">Cihaz Kısıtlaması</string>
+    <string name="device_restriction_message">Bu cihaz başka bir personele kayıtlıdır veya bu hesap başka bir cihaza bağlıdır. Lütfen yöneticinize başvurun.</string>
+
+    <!-- ══════════ Toolbar Başlıkları ══════════ -->
+    <string name="title_location_checkin">Konum ile Giriş/Çıkış</string>
+    <string name="title_qr_checkin">QR + Konum Giriş/Çıkış</string>
+    <string name="title_attendance_report">Giriş-Çıkış Raporu</string>
+    <string name="title_leave_request">İzin Talebi</string>
+    <string name="title_advance_request">Avans Talebi</string>
+    <string name="title_monthly_overtime">Aylık Mesai Bilgisi</string>
+    <string name="title_personnel_detail">Personel Bilgi Kartı</string>
+    <string name="title_late_early">Fazla Mesai / Eksik Mesai</string>
+    <string name="title_annual_leave">Yıllık İzin Talepleri</string>
+    <string name="title_daily_leave">Günlük İzin Talepleri</string>
+    <string name="title_hourly_leave">Saatlik İzin Talepleri</string>
+    <string name="title_advance_approval">Avans Talepleri</string>
+
+    <!-- ══════════ Konum ══════════ -->
+    <string name="location_ready">Konum hazır</string>
+    <string name="location_not_ready">Konum henüz alınamadı</string>
+    <string name="location_permission_required">Konum izni gerekli</string>
+    <string name="location_waiting">Konum bekleniyor…</string>
+    <string name="location_failed_retry">Konum alınamadı, tekrar deneyin</string>
+    <string name="location_fetching_card">Konum alınıyor… | Kart: %s</string>
+
+    <!-- ══════════ QR ══════════ -->
+    <string name="tab_qr_scan">QR Okut</string>
+    <string name="tab_qr_generate">QR Oluştur</string>
+    <string name="qr_scanned_processing">QR okundu — işleniyor…</string>
+    <string name="qr_operation_complete">İşlem tamamlandı</string>
+    <string name="qr_generate_failed">QR oluşturulamadı</string>
+    <string name="qr_timer_validity">Geçerlilik: %d sn</string>
+    <string name="qr_timer_expired">Süre doldu — yeniden oluşturun</string>
+    <string name="camera_start_failed">Kamera başlatılamadı</string>
+    <string name="camera_location_permission_required">Kamera ve konum izni gerekli</string>
+
+    <!-- ══════════ İzin Talebi ══════════ -->
+    <string name="leave_type_annual">Yıllık İzin</string>
+    <string name="leave_type_daily">Günlük İzin</string>
+    <string name="leave_type_hourly">Saatlik İzin</string>
+    <string name="leave_request_sent">İzin talebi gönderildi</string>
+    <string name="error_start_date_required">Başlangıç tarihi seçin</string>
+    <string name="error_end_date_required">Bitiş tarihi seçin</string>
+    <string name="error_time_range_required">Saat aralığı seçin</string>
+
+    <!-- ══════════ Avans Talebi ══════════ -->
+    <string name="advance_request_sent">Avans talebi gönderildi</string>
+    <string name="error_amount_required">Tutar girin</string>
+    <string name="error_amount_invalid">Geçerli bir tutar girin</string>
+    <string name="error_amount_positive">Tutar sıfırdan büyük olmalı</string>
+    <string name="advance_history_empty">Henüz avans talebi bulunmuyor</string>
+
+    <!-- ══════════ Puantaj Raporu ══════════ -->
+    <string name="tab_daily">Günlük</string>
+    <string name="tab_weekly">Haftalık</string>
+    <string name="label_checkin">G: %s</string>
+    <string name="label_checkout">Ç: %s</string>
+    <string name="label_no_time">--:--</string>
+    <string name="label_start">Başlangıç</string>
+    <string name="label_end">Bitiş</string>
+    <string name="label_start_time">Başlangıç Saati</string>
+    <string name="label_end_time">Bitiş Saati</string>
+    <string name="label_date">Tarih</string>
+    <string name="remaining_days_format">%.0f gün</string>
+
+    <!-- ══════════ Patron — Onay ══════════ -->
+    <string name="tab_pending">Bekleyen</string>
+    <string name="tab_approved">Onaylanan</string>
+    <string name="tab_rejected">Reddedilen</string>
+    <string name="empty_pending">Bekleyen talep bulunmuyor</string>
+    <string name="empty_approved">Onaylanan talep bulunmuyor</string>
+    <string name="empty_rejected">Reddedilen talep bulunmuyor</string>
+    <string name="confirm_approve_title">Onay</string>
+    <string name="confirm_reject_title">Red</string>
+    <string name="confirm_approve_leave">Bu izin talebini onaylamak istiyor musunuz?</string>
+    <string name="confirm_reject_leave">Bu izin talebini reddetmek istiyor musunuz?</string>
+    <string name="confirm_approve_advance">Bu avans talebini onaylamak istiyor musunuz?</string>
+    <string name="confirm_reject_advance">Bu avans talebini reddetmek istiyor musunuz?</string>
+    <string name="tab_overtime">Fazla Mesai</string>
+    <string name="tab_undertime">Eksik Mesai</string>
+    <string name="tab_overtime_count">Fazla Mesai (%d)</string>
+    <string name="tab_undertime_count">Eksik Mesai (%d)</string>
+    <string name="empty_overtime">Dün fazla mesai yapan personel yok</string>
+    <string name="empty_undertime">Dün eksik mesaisi olan personel yok</string>
+    <string name="badge_overtime">FAZLA</string>
+    <string name="badge_undertime">EKSİK</string>
+
+    <!-- ══════════ Patron — Dashboard ══════════ -->
+    <string name="all_departments">Tüm Departmanlar</string>
+    <string name="logout_title">Çıkış</string>
+    <string name="logout_message">Oturumu kapatmak istediğinize emin misiniz?</string>
+    <string name="btn_yes">Evet</string>
+    <string name="btn_cancel">İptal</string>
+    <string name="btn_ok">Tamam</string>
+
+    <!-- ══════════ Patron — Personel Detay ══════════ -->
+    <string name="personnel_list_title">Personel Listesi</string>
+    <string name="filter_label">Filtre: %s</string>
+    <string name="filter_active">Aktif Çalışanlar</string>
+    <string name="filter_on_leave">İzinli Personel</string>
+    <string name="filter_absent">Devamsız Personel</string>
+    <string name="filter_late">Geç Gelen Personel</string>
+    <string name="filter_early">Erken Çıkan Personel</string>
+    <string name="device_reset_title">Cihaz Kaydını Sıfırla</string>
+    <string name="device_reset_option">Cihaz Kaydını Sıfırla</string>
+    <string name="device_reset_message">%s adlı personelin cihaz kaydı silinecek.\n\nPersonel bir sonraki girişte yeni cihazına otomatik kaydedilecektir.\n\nDevam etmek istiyor musunuz?</string>
+    <string name="device_reset_button">Sıfırla</string>
+    <string name="device_reset_success">%s — cihaz kaydı sıfırlandı</string>
+    <string name="device_reset_failed">İşlem başarısız</string>
+    <string name="personnel_list_empty">Personel listesi boş döndü</string>
+    <string name="personnel_list_error">Personel listesi yüklenemedi (HTTP %d)</string>
+    <string name="personnel_list_network_error">Personel listesi hatası: %s</string>
 </resources>

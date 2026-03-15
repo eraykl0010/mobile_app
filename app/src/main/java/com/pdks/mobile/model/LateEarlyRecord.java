@@ -1,6 +1,8 @@
 package com.pdks.mobile.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.pdks.mobile.constants.AttendanceStatus;
+import com.pdks.mobile.constants.OvertimeType;
 
 public class LateEarlyRecord {
 
@@ -35,10 +37,10 @@ public class LateEarlyRecord {
     public String getDate() { return date; }
     public String getTypeDisplay() {
         switch (type) {
-            case "overtime":  return "Fazla Mesai";
-            case "undertime": return "Eksik Mesai";
-            case "late":      return "Geç Geldi";
-            case "early":     return "Erken Çıktı";
+            case OvertimeType.OVERTIME:  return "Fazla Mesai";
+            case OvertimeType.UNDERTIME: return "Eksik Mesai";
+            case AttendanceStatus.LATE:  return "Geç Geldi";
+            case AttendanceStatus.EARLY: return "Erken Çıktı";
             default:          return type;
         }
     }

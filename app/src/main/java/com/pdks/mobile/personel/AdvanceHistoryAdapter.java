@@ -8,11 +8,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pdks.mobile.R;
+import com.pdks.mobile.constants.RequestStatus;
 import com.pdks.mobile.model.AdvanceRequest;
 
 import java.text.NumberFormat;
@@ -70,8 +72,9 @@ public class AdvanceHistoryAdapter extends ListAdapter<AdvanceRequest, AdvanceHi
                         ? item.getReason() : "-");
 
         // Talep tarihi
-        holder.tvDate.setText("Talep: " +
-                (item.getRequestDate() != null ? item.getRequestDate() : "-"));
+        android.content.Context ctx = holder.itemView.getContext();
+        holder.tvDate.setText(ctx.getString(R.string.request_prefix,
+                item.getRequestDate() != null ? item.getRequestDate() : "-"));
 
         // Durum badge
         String status = item.getStatus();
@@ -80,17 +83,17 @@ public class AdvanceHistoryAdapter extends ListAdapter<AdvanceRequest, AdvanceHi
         String statusText;
         int statusColor;
         switch (safeStatus) {
-            case "approved":
-                statusText = "Onaylandı";
-                statusColor = Color.parseColor("#4CAF50");
+            case RequestStatus.APPROVED:
+                statusText = ctx.getString(R.string.status_approved);
+                statusColor = ContextCompat.getColor(ctx, R.color.status_success);
                 break;
-            case "rejected":
-                statusText = "Reddedildi";
-                statusColor = Color.parseColor("#F44336");
+            case RequestStatus.REJECTED:
+                statusText = ctx.getString(R.string.status_rejected);
+                statusColor = ContextCompat.getColor(ctx, R.color.status_danger);
                 break;
             default:
-                statusText = "Bekliyor";
-                statusColor = Color.parseColor("#FFC107");
+                statusText = ctx.getString(R.string.status_pending);
+                statusColor = ContextCompat.getColor(ctx, R.color.status_warning);
                 break;
         }
 
